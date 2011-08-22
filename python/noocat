@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+# This is a stripped-down version of
+#   http://4thmouse.com/wp-content/uploads/2008/02/net_tool.py
+# The closest to a license I could find is this exchange in the comment
+# section of this blog post:
+# http://4thmouse.com/index.php/2008/02/20/netcat-clone-in-three-languages-part-i-ruby/
+# "Can i re-use your code here with some modifications?"
+# "Please do. All examples on the site are fair game."
+
 import sys
 import socket
 import select
