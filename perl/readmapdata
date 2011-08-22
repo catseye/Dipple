@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+
+my $line;
+my @queue = ();
+while (defined($line = <STDIN>))
+{
+  while ($line =~ /^(.*?)\"(\d\d\d\d)(\w)*\"/)
+  {
+    my $skipped = $1;
+    my $walls = $2;
+    my $code = $3;
+    $line = $';
+
+    #print STDERR "skipped '$skipped'\n";
+    if ($code eq 's')
+    {
+      $code = '0001';
+    }
+    elsif ($code eq 't')
+    {
+      $code = '0010';
+    }
+    elsif ($code eq 'e')
+    {
+      $code = '0011';
+    }
+    else
+    {
+      #print STDERR "code was '$code'\n";      
+      $code = '0000';
+    }
+
+    push @queue, "\%$walls$code";
+    if ((scalar @queue) == 20)
+    {
+      print ".byte " . (join(', ', @queue)) . "\n";
+      @queue = ();
+    }
+  }
+  #print ".byte " . (join(', ', @queue)) . "\n";
+  #@queue = ();
+  #print "; rest of line = " . $line;
+}
+print ".byte " . (join(', ', @queue)) . "\n";

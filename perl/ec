@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+#erl -noshell -run ec -run erlang halt
+
+my $erlc = '/cygdrive/c/Program\ Files/erl5.3.6.3/bin/erlc.exe';
+
+sub do_it($)
+{
+  my $cmdline = shift;
+  print "$cmdline\n";
+  my $errcode = system($cmdline);
+  if ($errcode != 0) {
+    die;
+  }
+}
+
+sub traverse_dir($)
+{
+  my $dir = shift;
+  #print "traversing $dir\n";
+  my $cooked_dir = $dir;
+  $cooked_dir = '.' if $dir eq '';
+  opendir DIR, $cooked_dir;
+  my @files = ();
+  while (defined (my $file = readdir(DIR))) {
+    next if $file eq '.' or $file eq '..' or $file eq '.svn';
+    push @files, $file;
+  }
+  closedir DIR;
+
+  foreach my $file (sort @files) {
+    my $full_file = "$dir/$file";
+    $full_file = $file if $dir eq '';
+
+    if (-d $full_file) {
+      traverse_dir($full_file);
+    } elsif ($file =~ m|^(.*?)\.erl$|) {
+      my $dest = "$1.beam";
+      my $full_dest = "$dir/$1.beam";
+      $full_dest =~ s/^src/ebin/;
+      
+      my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+          $atime,$src_mtime,$ctime,$blksize,$blocks)
+          = stat($full_file);
+
+      my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+          $atime,$dest_mtime,$ctime,$blksize,$blocks)
+          = stat($full_dest);
+
+      #print "$src_mtime, $dest_mtime\n";
+      if ($force or (not defined $dest_mtime) or ($src_mtime > $dest_mtime)) {
+        do_it "$erlc $full_file && mv $dest $full_dest";
+      }
+    }
+  }
+}
+
+traverse_dir('src');

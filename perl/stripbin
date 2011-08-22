@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+
+# Strip a few leading bytes (the # specified on the command line)
+# from a binary file.  Used to remove the load address from C64 .PRG
+# files so they can be included at your chosen address in a .P65 source
+# using the incbin directive.
+
+$file = $ARGV[0];
+$outfile = $ARGV[1];
+$bytes = $ARGV[2];
+
+print "$file\n";
+open FILE, "<$file";
+binmode FILE;
+read FILE, $contents, 65536;
+close FILE;
+
+print length($contents) . "\n";
+
+$contents = substr($contents, $bytes);
+
+print length($contents) . "\n";
+
+open OUTFILE, ">$outfile";
+binmode OUTFILE;
+print OUTFILE $contents;
+close OUTFILE;
+

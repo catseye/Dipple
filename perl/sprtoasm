@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+
+# Reads in a C64 binary PRG containing sprites and outputs P65 assembly for them.
+
+open FILE, "<$ARGV[0]";
+binmode FILE;
+
+my $len, $buffer;
+
+read FILE, $len, 2;
+
+printf ".org \$%02x%02x\n\n", ord(substr($len, 1, 1)), ord(substr($len, 0, 1));
+
+read FILE, $buffer, 64;
+while (not eof(FILE))
+{
+    my $offset = 0;
+    for ($i = 0; $i < 21; $i++)
+    {
+        printf ".byte \$%02x,\$%02x,\$%02x\n",
+          ord(substr($buffer, $offset, 1)),
+          ord(substr($buffer, $offset+1, 1)),
+          ord(substr($buffer, $offset+2, 1));
+        $offset += 3;
+    }
+    print "\n.byte 0\n\n";   # padding
+    read FILE, $buffer, 64;
+}
+
+close FILE;

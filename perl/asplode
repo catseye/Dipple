@@ -1,0 +1,58 @@
+#!/usr/bin/perl
+
+# Script to extract all files from a set of .d64 disk images, putting the
+# files from each disk into its own folder.  Also, detokenize every file,
+# (on the assumption that it is a BASIC file) putting the detokenized
+# version in a common LISTING directory.
+
+sub cleanout ($) {
+    my $dir = shift;
+    if (-e $dir) {
+        if (!-d $dir) {
+           die "$dir is not a directory";
+        }
+        system "rm -r '$dir'";
+    }
+    mkdir $dir;
+}
+
+opendir DIR, ".";
+open LISTING, ">d64.lst";
+cleanout "COMMON";
+cleanout "LISTING";
+while (my $file = readdir(DIR)) {
+    if ($file =~ /\.d64$/ and $file !~ /^ACS_/ and $file !~ /^AGCK_/) {
+        print LISTING "$file\n";
+        print "$file:\n";
+
+        my $listing = `c1541 '$file' -list`;
+        print LISTING $listing;
+
+        my $root = $file;
+        $root =~ s/\.d64$//;
+        my $dir = $root . ".DIR";
+        cleanout $dir;
+        chdir $dir;
+        system "c1541 '../$file' -extract";
+        opendir SUBDIR, ".";
+        my @subfiles = readdir(SUBDIR);
+        closedir SUBDIR;
+        foreach my $extfile (@subfiles) {
+            next if -d $extfile;
+            my $newfile = $extfile;
+            $newfile =~ s/\'/\_/g;
+            rename $extfile, $newfile;  # avoid problems with horrid characters
+            system "cp -P './$newfile' '../COMMON/$newfile ($root)'";
+            if ($newfile !~ /\.dig$/ and $newfile !~ /^l\d\dt$/) {
+                print "listing $newfile...\n";
+                system "petcat '$newfile' >'../LISTING/$newfile ($root).txt'";
+            }
+        }
+        chdir '..';
+
+        print "\n";
+        print LISTING "\n";
+    }
+}
+closedir DIR;
+

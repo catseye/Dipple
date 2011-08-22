@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+
+# Wed, 02 Apr 2008 07:59:59 GMT
+
+print `date -u "+%a, %d %b %Y %T GMT"`

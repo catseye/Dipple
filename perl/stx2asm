@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+
+# Reads in a text file containing sprites (stx) and outputs p65 assembly for them.
+
+open FILE, "<$ARGV[0]";
+
+my $ctr = 0;
+my @lines = ();
+while ($line = <FILE>)
+{
+    chomp $line;
+    if ($line =~ /^\s*$/)
+    {
+        dump_sprite(@lines);
+        @lines = ();
+    }
+    elsif ($line =~ /^\s*(\w+)\s*\:\s*$/)
+    {
+        print ".alias $1 sprite_0_page+$ctr\n";
+        $ctr++;
+    }
+    elsif ($line =~/^\s*(........................)\s*$/)
+    {
+        push @lines, $1;
+    }
+}
+
+sub dump_sprite
+{
+    my @lines = @_;
+    my $ctr = 0;
+    for my $line (@lines)
+    {
+        printf ".byte \$%02x,\$%02x,\$%02x\n",
+                decode(substr($line, 0, 8)),
+                decode(substr($line, 8, 8)),
+                decode(substr($line, 16, 8));
+        $ctr++;
+    }
+    die "Incorrect sprite size" if $ctr != 21;
+    print "\n.byte 0\n\n";   # padding
+}
+
+sub decode
+{
+    my $text = shift;
+    my $acc = 0;
+    
+    for my $bit (0 .. 7)
+    {
+        if (substr($text, $bit, 1) eq 'X') { $acc += (1 << (7 - $bit)); }
+    }
+    
+    return $acc;
+}
+
+close FILE;

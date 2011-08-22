@@ -1,0 +1,7 @@
+#!/usr/bin/perl
+
+$fn = $ARGV[0];
+$fn =~ s/^\.\///g;
+$fn =~ s/\//_/g;
+system "cp -Rp \"$ARGV[0]\" \"$fn\"";
+

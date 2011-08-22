@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+$f = <STDIN>;
+for ($i = 0; $i < length($f); $i++)
+{
+    printf "MOV R0, %d\n", ord(substr($f, $i, 1));
+}

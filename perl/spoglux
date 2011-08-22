@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+$| = 1;
+while ($x = <STDIN>) {
+  chomp $x;
+  $c += length($x);
+  print "$c\n";
+}
+
+

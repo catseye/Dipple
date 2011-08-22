@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+
+while($file = shift @ARGV) {
+  print "            /* $file */\n";
+  open FILE, "<$file";
+  while($line=<FILE>) {
+    $line =~ s/(\r|\n)//g;
+    $line =~ s/\\/\\\\/g;
+    print '            "' . $line . '",' . "\n";
+  }
+  close FILE;
+}
+
