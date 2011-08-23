@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+
+my %rule = (
+	'11' => '12',
+	'12' => '122',
+	'21' => '112',
+	'22' => '1122'
+);
+
+my $k = "122112122122112112212112122";
+
+my $s = '122';
+my $p = '';
+my $n = 1;
+my $t = 16;
+
+sub square($rule) {
+	my $newrule = +{};
+	foreach my $i (sort keys %$rule) {
+		foreach my $j (sort keys %$rule) {
+			$newrule->{$i . $j} = $rule->{$i} . $rule->{$j};
+		}
+	}
+	return $newrule;
+	# remember to double len
+}
+
+my $len = 2;
+
+foreach my $k (sort keys %rule) {
+	print "$k -> $rule{$k}\n";
+}
+print "\n";
+
+print "K: $k...\n";
+print "0: $s\n";
+my $spc = (' ' x $len);
+
+while ($n <= $t) {
+	my $h = substr($s, 0, $len);
+	my $r = substr($s, $len);
+	my $z = $rule{$h};
+	#print "$n: $p  $k  $r+$z\n";
+	$s = $r . $z;
+	print "$n: ${spc}$s\n";
+	# $p .= $k;
+	$spc .= (' ' x $len);
+	$n++;
+}

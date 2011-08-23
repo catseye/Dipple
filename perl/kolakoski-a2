@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+
+my %rule = (
+	'12' => '11',
+	'122' => '12',
+	'112' => '21',
+	'1122' => '22'
+);
+
+my $k = $ARGV[0] or "122112122122112112212112122";
+$s = $k;
+
+foreach my $key (sort { length($b) <=> length($a) } keys %rule) {
+	print "$key -> $rule{$key}\n";
+}
+print "\n";
+
+printf "%5d: $s\n", 0;
+$done = 0;
+$n = 1;
+while (not $done) {
+	$done = 1;
+	foreach my $key (sort  { length($b) <=> length($a) } keys %rule) {
+		my $klen = length($key);
+		if (substr($s, (length($s) - $klen)) eq $key) {
+			$s = $rule{$key} . substr($s, 0, length($s)-$klen);
+			$done = 0;
+			last;
+		}
+	}
+	printf "%5d: ${spc}$s\n", $n;
+	if ((index $s, "111") != -1 or index($s, "222") != -1) {
+		print "illegal string\n";
+		last;
+	}
+	$n++;
+}

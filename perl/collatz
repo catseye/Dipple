@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+
+# my $k = 0 + $ARGV[0];
+$|=1;
+$z = 0;
+while ($z < 1000000) {
+
+	$ups = 0;
+	$downs = 0;
+	$k = $z;
+
+	if ($z % 1000 == 0) {
+		print "$z: ";
+	}
+	while ($k > 1) {
+		$r = int($k / 2);
+		# print "$k (= 2 x $r + 1),\n";
+		if ($k % 2 == 1) {
+			# print "^";
+			$ups++;
+			$k = $k * 3 + 1;
+		} else {
+			# print "v";
+			$downs++;
+			$k = int($k / 2);
+		}
+	}
+
+	if ($z % 1000 == 0) {
+		print " ($ups x ^, $downs x v)\n";
+	}
+
+	$table->{sprintf("%05d", $ups)}->{sprintf("%05d", $downs)}++;
+
+	$z++;
+}
+
+print "\nSummary:\n";
+foreach my $up_key (sort keys %$table) {
+	foreach my $down_key (sort keys %{$table->{$up_key}}) {
+		my $count = $table->{$up_key}->{$down_key};
+		printf "%5d ^ %5d v  --> %5d x\n", $up_key, $down_key, $count;
+	}
+}

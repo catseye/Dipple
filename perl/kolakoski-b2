@@ -1,0 +1,59 @@
+#!/usr/bin/perl
+
+#my $k = "122112122122112112212112122";
+
+my $target = "122122122122122122";
+
+
+sub reduce($) {
+	my $s = shift;
+
+	# If the string begins or ends with a single digit,
+	# we can't tell if that digit was part of a pair or
+	# not, so we strip it off before continuing.
+
+	if ($s ~= /^12/ or $s ~= /^21/) {
+		$s = substr($s, 1);
+	}
+
+	if ($s ~= /12$/ or $s ~= /21$/) {
+		$s = substr($s, 0, -1);
+	}
+
+	my $i = 0;
+	my $acc = '';
+	while ($i < length($s)) {
+		$i++;
+	}
+		
+}
+
+sub is_legal($) {
+	my $s = shift;
+	if ($s ~= /111/ or $s ~= /222/) return 0;
+}
+
+#print "K   : $k...\n";
+#while ($n <= $t) {
+while (length($s) <= 10000000) {
+	$inspect = substr $s, $n, 1;
+	if ($inspect eq ' ') { $count = 1; } else { $count = 2; }
+	if ($state eq '1') { $gen = '*'; } else { $gen = ' '; }
+	$gen = $gen x $count;
+	$s .= $gen;
+	my $l = length($s);
+	if ($n % 10000 == 0) {
+		my $lab = sprintf("%4d", $n);
+		my $d = $l-$n;
+		print "n=$n, |s|=$l, |s|-$n=$d\n";
+	}
+	# print "$lab: $s\n";
+	#if (index($s, $target) != -1) {
+	#	print "FOUND\n";
+	#	exit;
+	#}
+	if ($state eq '1') { $state = '2'; } else { $state = '1'; }
+	$n++;
+}
+
+#print "$s\n";
