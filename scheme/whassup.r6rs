@@ -1,0 +1,4 @@
+#lang r6rs
+(import (rnrs base) (rnrs io simple)) (display
+                                         ((car (list cdr car)) (quote (a b)))
+                                      )
