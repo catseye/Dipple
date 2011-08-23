@@ -1,0 +1,33 @@
+procedure expression()
+  return case ?3 of {
+    1: term()
+    2: term()
+    3: term() || "+" || expression()
+  }
+end
+
+procedure term()
+  return case ?3 of {
+    1: element()
+    2: element()
+    3: element() || "*" || term()
+  }
+end
+
+procedure element()
+  return case ?4 of {
+    1: "x"
+    2: "y"
+    3: "z"
+    4: "(" || expression() || ")"
+  }
+end
+
+procedure main()
+  # write("Hello, world!")
+  # every write((1 to (2 to 12)) * 5, "whee")
+  every j := 1 to 10 do {
+    write(expression())
+    # write(j)
+  }
+end
