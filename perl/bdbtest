@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+
+use strict 'vars', 'refs';
+use BerkeleyDB;
+
+my %hash = ();
+my $db = tie %hash, 'BerkeleyDB::Hash',
+    -Filename => "testDB",
+    -Flags    => DB_CREATE;
+
+if ($ARGV[0] eq '-r') {
+    my $x = $hash{$ARGV[1]};
+    die "not found\n" if not defined $x;
+    print "name: $x{name}\n";
+    print "date: $x{date}\n";
+    exit(0);
+}
+
+if ($ARGV[0] eq '-w') {
+    my $key = $ARGV[1];
+    my $name = $ARGV[2];
+    my $date = 0 + $ARGV[3];
+    $hash{$key}{name} = $name;
+    $hash{$key}{date} = $date;
+    print "ok\n";
+    exit(0);
+}
+
+die "usage\n";
