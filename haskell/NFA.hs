@@ -1,18 +1,12 @@
 module NFA where
 
-import Char
-
 type State = Integer
 
-data Transition = Transition State Char State
-    deriving (Show, Ord, Eq)
-
-type NFA = [Transition]
+data (Eq a) => Transition a = Transition State a State
 
 
-transitionOnce :: NFA -> [State] -> Char -> [State]
-
-transitionOnce nfa states input =
+moveOnce :: (Eq a) => [Transition a] -> [State] -> a -> [State]
+moveOnce nfa states input =
     let
         test (Transition here x there) =
             x == input && elem here states
@@ -22,19 +16,22 @@ transitionOnce nfa states input =
         map (extract) $ filter (test) nfa
 
 
-transitionMany :: NFA -> [State] -> String -> [State]
+moveMany :: (Eq a) => [Transition a] -> [State] -> [a] -> [State]
+moveMany nfa = foldl (moveOnce nfa)
 
-transitionMany nfa states [] =
-    states
-transitionMany nfa states (input:rest) =
-    transitionMany nfa (transitionOnce nfa states input) rest
+--
+-- Accepts (in state 6) the strings "ask" and "apt",
+-- but not "ast" or "apk"
+--
 
-
+egNFA :: [Transition Char]
 egNFA = [
           Transition 1 'a' 2,
-          Transition 1 'a' 3,
-          Transition 1 'b' 4,
-          Transition 2 'b' 1,
-          Transition 3 'b' 2,
-          Transition 4 'c' 1
+          Transition 1 'a' 4,
+          Transition 2 's' 3,
+          Transition 3 'k' 6,
+          Transition 4 'p' 5,
+          Transition 5 't' 6
         ]
+
+test str = moveMany egNFA [1] str
