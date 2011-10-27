@@ -7,13 +7,7 @@ data (Eq a) => Transition a = Transition State a State
 
 moveOnce :: (Eq a) => [Transition a] -> [State] -> a -> [State]
 moveOnce nfa states input =
-    let
-        test (Transition here x there) =
-            x == input && elem here states
-        extract (Transition here x there) =
-            there
-    in
-        map (extract) $ filter (test) nfa
+    [there | (Transition here x there) <- nfa, x == input, elem here states]
 
 
 moveMany :: (Eq a) => [Transition a] -> [State] -> [a] -> [State]
