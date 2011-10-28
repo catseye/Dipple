@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+# encoding: UTF-8
+
+import sys
+import fileinput
+
+MAP = {
+  '>': '→',
+  '<': '←',
+  '^': '↑',
+  'v': '↓',
+}
+
+for line in fileinput.input():
+    if line.startswith("| ") or line.startswith("    "):
+        for char in MAP:
+            line = line.replace(char, MAP[char])
+    sys.stdout.write(line)
