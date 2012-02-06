@@ -8,21 +8,21 @@ expand ('$':'{':rest) alist =
     in
         case lookup name alist of
             Just value ->
-                value ++ (expand rest alist)
+                value ++ (expand rest' alist)
             Nothing ->
-                expand rest alist
+                expand rest' alist
+    where
+        getName "" =
+            ("", "")
+        getName ('}':rest) =
+            ("", rest)
+        getName (c:rest) =
+            let
+                (remainder, rest') = getName rest
+            in
+                ((c:remainder), rest')
 expand (c:rest) alist =
-    expand rest alist
-
-getName "" =
-    ("", "")
-getName ('}':rest) =
-    ("", rest)
-getName (c:rest) =
-    let
-        (remainder, rest') = getName rest
-    in
-        ((c:remainder), rest')
+    (c:expand rest alist)
 
 test =
     [
