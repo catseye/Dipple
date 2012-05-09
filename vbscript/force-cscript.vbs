@@ -4,12 +4,12 @@
 
 ' I don't know if this will actually work or not yet :/
 
-Option Explciit
+Option Explicit
 Dim WshShell
 
-If Left(UCase(WshShell.name), 7) <> "CSCRIPT" Then
+If InStr(UCase(WScript.name), "CSCRIPT") = 0 Then
     Set WshShell = WScript.CreateObject("WScript.Shell")
-    WshShell.Run("CScript //Nologo " & WScript.ScriptFullName, 1, True)
+    WshShell.Run "CScript //Nologo " & WScript.ScriptFullName, 1, True
 Else
-    WScript.Echo("This should appear in a Console window")
+    WScript.Echo "This should appear in a Console window"
 End If
