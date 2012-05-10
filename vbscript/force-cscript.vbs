@@ -7,7 +7,7 @@
 Option Explicit
 Dim WshShell
 
-If InStr(UCase(WScript.name), "CSCRIPT") = 0 Then
+If InStr(UCase(WScript.FullName), "CSCRIPT") = 0 Then
     Set WshShell = WScript.CreateObject("WScript.Shell")
     WshShell.Run "CScript //Nologo " & WScript.ScriptFullName, 1, True
 Else
