@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 def ack(m, n):
     if m == 0:
         return n + 1

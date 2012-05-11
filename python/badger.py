@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import getopt
 
@@ -29,7 +31,9 @@ def main(argv):
             global _debug
             _debug = 1
 
-    #source = "".join(args)
     for thing in args:
         k = doTheThing(thing)
     print k.output()
+
+if __name__ == '__main__':
+    main(sys.argv)
