@@ -38,6 +38,11 @@
  */
 
 /*
+ * This compiler takes programs written in the Smallf*ck programming language
+ * and converts them to equivalent lookup tables.  This was written mainly to
+ * demonstrate what happens when your language is defined over a finite
+ * state-space: every program can be run in O(n) time!
+ *
  * Some Smallfuck programs that can be used as testcases:
  *     [*>]
  *     []*[]
