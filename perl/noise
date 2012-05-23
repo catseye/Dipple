@@ -4,6 +4,11 @@
 # Fairly realistic line noise simulator.
 # Usage: [perl] noise[.pl] [average-long-delay-in-seconds] &
 
+# `noise` is a tiny utility whose purpose is to simulate line noise -- those
+# random bursts of static that occur when communicating with a non-error-
+# correcting modem over an unreliable phone line.  Start it up in the
+# background and keep working at your shell prompt -- or, keep *trying* to!
+
 # As of May 21 2012, this source is hereby placed in the public domain.
 
 ### BEGIN noise[.pl] ###
