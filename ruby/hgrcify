@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+project = File.basename(Dir.pwd)
+filename = ".hg/hgrc"
+if File.exist? filename
+  puts "#{filename} exists:\n\n"
+else
+  File.open(filename, 'w') do |f|  
+    f.puts <<"EOF"
+[paths]
+default = https://catseye@bitbucket.org/catseye/#{project}
+EOF
+  end  
+  puts "created #{filename}:\n\n"
+end
+File.open(filename, 'r') do |f|
+  while line = f.gets  
+    puts line
+  end
+end
