@@ -1,0 +1,14 @@
+document:
+  title: This is the title.
+  author: Josters F. Jenkles
+  template: front-matter.html
+  body: |-
+    Hello
+    =====
+
+    This is my markdown document.  It may contain variables, like
+
+    {{ title }}
+    -----------
+
+    This is a really great document by **{{ author }}**.
