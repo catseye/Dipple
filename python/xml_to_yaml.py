@@ -4,13 +4,15 @@
 # equivalent yaml file.  Big problem: embedded HTML; it throws away most of it.
 # Secondary problem: requires an extra top-level <root></root> element.
 
+import sys
+
 # easy_install PyYaml
 import yaml
 
 # from http://code.activestate.com/recipes/410469-xml-as-dictionary/
 
-# easy_install cElementTree
-import cElementTree as ElementTree
+# easy_install ElementTree
+from elementtree import ElementTree
 
 class XmlListConfig(list):
     def __init__(self, aList):
@@ -90,8 +92,8 @@ def to_plain(o):
         return o
 
 
-tree = ElementTree.parse('foo.xml')
-root = tree.getroot()
-xmldict = to_plain(XmlDictConfig(root))
-#print xmldict
-print yaml.dump(xmldict, default_flow_style=False)
+if __name__ == '__main__':
+    tree = ElementTree.parse(sys.argv[1])
+    root = tree.getroot()
+    xmldict = to_plain(XmlDictConfig(root))
+    print yaml.dump(xmldict, default_flow_style=False, default_style='|')
