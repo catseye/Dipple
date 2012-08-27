@@ -4,6 +4,8 @@
 # equivalent yaml file.  Big problem: embedded HTML; it throws away most of it.
 # Secondary problem: requires an extra top-level <root></root> element.
 
+# Contains code from a website, and is therefore not in the public domain.
+
 import sys
 
 # easy_install PyYaml
