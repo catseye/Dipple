@@ -1,3 +1,14 @@
+/*
+ * This is not a recommended way to make a class in Javascript, but it works
+ * (after a fashion).  You don't need to use the "new" keyword, you just call
+ * Playfield() to create a new Playfield object.  You could call this the
+ * "closure-based object" pattern, and you can do it in any language that
+ * provides both closures and mutable variables (I've also done it in Lua and
+ * Bhuna.)
+ *
+ * For a more Javascriptic Playfield class, see the Gemooy repository (also
+ * in the public domain.)
+ */
 function Playfield() {
     var self = {}
     var store = {}
