@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Web Worker Demo</title>
+</head>
+<body>
+
+<h1>Web Worker Demo</h1>
+
+<button id="start">Start</button>
+<button id="kill">Kill</button>
+<textarea rows=20 cols=80 id="output"></textarea>
+
+</body>
+<script>
+  var w = new Worker("web-worker.js");
+  var output = document.getElementById('output');
+  w.addEventListener('message', function(e) {
+    output.value += e.data;
+  });
+  document.getElementById('start').onclick = function(e) {
+    w.postMessage(["start", 23]);
+  };
+  document.getElementById('kill').onclick = function(e) {
+    w.terminate();
+  };
+</script>
