@@ -35,5 +35,8 @@
     t.write("Whatever\b\b!!\n");
     z++;
   };
-  t.hookUpKeyboardInput(window);
+  var ib = new LineInputBuffer();
+  ib.init(window, t, function(str) {
+    alert(str);
+  });
 </script>

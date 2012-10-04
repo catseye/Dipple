@@ -198,21 +198,46 @@ TextConsole = function() {
       this.cursorEnabled = false;
     }
   };
+};
 
-  /*
-   * DEMONSTRATION ONLY of capturing keypresses and writing them to the
-   * console.
-   */
-  this.hookUpKeyboardInput = function(object) {
-    var t = this; 
-    object.addEventListener('keyup', function(e) {
+/*
+ * Object that captures keystrokes and optionally updates a TextConsole.
+ * Mostly for demonstration purposes so far.
+ */
+
+LineInputBuffer = function() {
+  this.listenObject = undefined;
+  this.console = undefined;
+  this.callback = undefined;
+  this.text = undefined;
+
+  this.init = function(listenObject, console, callback) {
+    this.listenObject = listenObject;
+    this.console = console;
+    this.callback = callback;
+    this.text = "";
+    
+    me = this;
+    listenObject.addEventListener('keyup', function(e) {
       //alert(e.keyCode);
       switch (e.keyCode) {
         case 8:   /* Backspace */
-          t.write('\b');
+          if (me.console !== undefined) {
+            me.console.write('\b \b');
+          }
+          if (me.text.length > 0) {
+            me.text = me.text.substring(0, me.text.length-2);
+          }
           break;
         case 13:  /* Enter */
-          t.write('\n');
+          if (me.console !== undefined) {
+            me.console.write('\n');
+          }
+          me.text = me.text.substring(0, me.text.length-1);
+          if (me.callback !== undefined) {
+            me.callback(me.text);
+          }
+          me.text = "";
           break;
         case 38:  /* Up arrow */
           break;
@@ -224,21 +249,16 @@ TextConsole = function() {
           break;
       }
     }, true);
-    object.addEventListener('keypress', function(e) {
+    listenObject.addEventListener('keypress', function(e) {
       if (e.altKey) {
         //alert(e.charCode);
-        switch (e.charCode) {
-          case 91:
-            t.enableCursor(true);
-            break;
-          case 93:
-            t.enableCursor(false);
-            break;
-        }
         return;
       }
-      t.write(String.fromCharCode(e.charCode));
+      var chr = String.fromCharCode(e.charCode);
+      if (me.console !== undefined) {
+        me.console.write(chr);
+      }
+      me.text += chr;
     }, true);
-  }
+  };
 };
-
