@@ -17,8 +17,6 @@
  * between calls to t.write().  You can call t.reset() to clear the
  * simulated screen (to the selected backgroundColor.)  You can also set
  * or clear overStrike mode.
- *
- * TODO: display a blinking cursor (and allow it to be turned off.)
  */
 TextConsole = function() {
   this.canvas = null;
@@ -31,7 +29,8 @@ TextConsole = function() {
   this.overStrike = null;
   this.textColor = null;
   this.backgroundColor = null;
-  
+
+  this.cursorEnabled = null;  
   this.blinkInterval = null;
   this.cursorIsShowing = null;
 
@@ -57,8 +56,9 @@ TextConsole = function() {
   this.drawCursor = function(sty) {
     var ctx = this.canvas.getContext('2d');
     ctx.strokeStyle = sty;
+    ctx.lineWidth = 2;
     var x = this.col * this.charWidth;
-    var y = (this.row+1) * this.charHeight - 1.5;
+    var y = (this.row+1) * this.charHeight - 1;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x + this.charWidth, y);
@@ -69,6 +69,9 @@ TextConsole = function() {
    * Start the cursor blinking, if it's not already.
    */
   this.startCursor = function() {
+    if (!this.cursorEnabled) {
+      return;
+    }
     if (this.blinkInterval !== null) {
       clearInterval(this.blinkInterval);
     }
@@ -90,6 +93,9 @@ TextConsole = function() {
    * Start the cursor blinking, if it's not already.
    */
   this.stopCursor = function() {
+    if (!this.cursorEnabled) {
+      return;
+    }
     if (this.blinkInterval !== null) {
       clearInterval(this.blinkInterval);
     }
@@ -100,7 +106,7 @@ TextConsole = function() {
   /*
    * Resize the TextConsole to match the given dimensions,
    * clear it to the current backgroundColor, turn off
-   * overstrike mode, and home the cursor.
+   * overstrike mode, make the cursor visible, and home it.
    */
   this.reset = function() {
     this.overStrike = false;
@@ -111,6 +117,7 @@ TextConsole = function() {
     var ctx = this.canvas.getContext('2d');
     ctx.fillStyle = this.backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.cursorEnabled = true;
     this.startCursor();
   };
 
@@ -181,6 +188,17 @@ TextConsole = function() {
     this.startCursor();
   };
 
+  this.enableCursor = function(b) {
+    b = !!b;
+    if (b) {
+      this.cursorEnabled = true;
+      this.startCursor();
+    } else {
+      this.stopCursor();
+      this.cursorEnabled = false;
+    }
+  };
+
   /*
    * DEMONSTRATION ONLY of capturing keypresses and writing them to the
    * console.
@@ -207,6 +225,18 @@ TextConsole = function() {
       }
     }, true);
     object.addEventListener('keypress', function(e) {
+      if (e.altKey) {
+        //alert(e.charCode);
+        switch (e.charCode) {
+          case 91:
+            t.enableCursor(true);
+            break;
+          case 93:
+            t.enableCursor(false);
+            break;
+        }
+        return;
+      }
       t.write(String.fromCharCode(e.charCode));
     }, true);
   }
