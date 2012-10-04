@@ -31,6 +31,8 @@ TextConsole = function() {
   this.overStrike = null;
   this.textColor = null;
   this.backgroundColor = null;
+  
+  this.blinkInterval = null;
 
   /*
    * Attach a canvas to this TextConsole.  The canvas will
@@ -65,6 +67,10 @@ TextConsole = function() {
     var ctx = this.canvas.getContext('2d');
     ctx.fillStyle = this.backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (this.blinkInterval !== null) {
+      clearInterval(this.blinkInterval);
+      this.blinkInterval = setInterval(function() {
+      }, 500);
   };
 
   /*
@@ -129,4 +135,28 @@ TextConsole = function() {
     this.col = x;
     this.row = y;
   };
+
+  /*
+   * DEMONSTRATION ONLY of capturing keypresses and writing them to the
+   * console.
+   */
+  this.hookUpKeyboardInput = function(object) {
+    var t = this; 
+    object.addEventListener('keyup', function(e) {
+      switch (e.keyCode) {
+        case 38:  /* Up arrow */
+          break;
+        case 40:  /* Down arrow */
+          break;
+        case 37:  /* Left arrow */
+          break;
+        case 39:  /* Right arrow */
+          break;
+      }
+    }, true);
+    object.addEventListener('keypress', function(e) {
+      t.write(String.fromCharCode(e.charCode));
+    }, true);
+  }
 };
+
