@@ -8,18 +8,19 @@
 
 <h1>TextConsole Demo</h1>
 
-<canvas id="canvas" width="400" height="400">
+<canvas id="canvas" width="400" height="400" tabindex="0">
   Your browser doesn't support displaying an HTML5 canvas.
 </canvas>
 
 </body>
 <script>
-  var ctx = document.getElementById('canvas').getContext('2d');
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
   var t = new TextConsole();
   var z = 0;
-  t.init(document.getElementById('canvas'), 20, 80, 25);
+  t.init(canvas, 20, 80, 25);
   t.write("Click me!\n");
-  document.getElementById('canvas').onclick = function(e) {
+  canvas.onclick = function(e) {
     t.write("Hello, world! (" + z + ")  ");
     t.textColor = "white";
     t.write("How's by you? ");
@@ -36,7 +37,8 @@
     z++;
   };
   var ib = new LineInputBuffer();
-  ib.init(window, t, function(str) {
+  ib.init(canvas, t, function(str) {
     alert(str);
   });
+  canvas.focus();
 </script>

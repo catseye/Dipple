@@ -228,6 +228,7 @@ LineInputBuffer = function() {
           if (me.text.length > 0) {
             me.text = me.text.substring(0, me.text.length-2);
           }
+          e.cancelBubble = true;
           break;
         case 13:  /* Enter */
           if (me.console !== undefined) {
@@ -238,6 +239,7 @@ LineInputBuffer = function() {
             me.callback(me.text);
           }
           me.text = "";
+          e.cancelBubble = true;
           break;
         case 38:  /* Up arrow */
           break;
@@ -259,6 +261,7 @@ LineInputBuffer = function() {
         me.console.write(chr);
       }
       me.text += chr;
+      e.cancelBubble = true;
     }, true);
   };
 };
