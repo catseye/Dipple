@@ -33,6 +33,7 @@ TextConsole = function() {
   this.backgroundColor = null;
   
   this.blinkInterval = null;
+  this.cursorIsShowing = null;
 
   /*
    * Attach a canvas to this TextConsole.  The canvas will
@@ -53,6 +54,49 @@ TextConsole = function() {
     this.reset();
   };
 
+  this.drawCursor = function(sty) {
+    var ctx = this.canvas.getContext('2d');
+    ctx.strokeStyle = sty;
+    var x = this.col * this.charWidth;
+    var y = (this.row+1) * this.charHeight - 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + this.charWidth, y);
+    ctx.stroke();
+  };
+
+  /*
+   * Start the cursor blinking, if it's not already.
+   */
+  this.startCursor = function() {
+    if (this.blinkInterval !== null) {
+      clearInterval(this.blinkInterval);
+    }
+    var me = this;
+    me.drawCursor(me.textColor);
+    me.cursorIsShowing = true;
+    this.blinkInterval = setInterval(function() {
+      if (!me.cursorIsShowing) {
+        me.drawCursor(me.textColor);
+        me.cursorIsShowing = true;
+      } else {
+        me.drawCursor(me.backgroundColor);
+        me.cursorIsShowing = false;
+      }
+    }, 500);
+  };
+
+  /*
+   * Start the cursor blinking, if it's not already.
+   */
+  this.stopCursor = function() {
+    if (this.blinkInterval !== null) {
+      clearInterval(this.blinkInterval);
+    }
+    this.drawCursor(this.backgroundColor);
+    this.cursorIsShowing = false;
+  };
+
   /*
    * Resize the TextConsole to match the given dimensions,
    * clear it to the current backgroundColor, turn off
@@ -67,10 +111,7 @@ TextConsole = function() {
     var ctx = this.canvas.getContext('2d');
     ctx.fillStyle = this.backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (this.blinkInterval !== null) {
-      clearInterval(this.blinkInterval);
-      this.blinkInterval = setInterval(function() {
-      }, 500);
+    this.startCursor();
   };
 
   /*
@@ -104,6 +145,7 @@ TextConsole = function() {
     var ctx = this.canvas.getContext('2d');
     ctx.textBaseline = "top";
     ctx.font = this.charHeight + "px monospace";
+    this.stopCursor();
     while (i < string.length) {
       var c = string.charAt(i);
       if (c === '\n') {
@@ -125,6 +167,7 @@ TextConsole = function() {
       }
       i++;
     };
+    this.startCursor();
   };
 
   /*
@@ -132,8 +175,10 @@ TextConsole = function() {
    * (0-based) and y is the row number (also 0-based.)
    */
   this.gotoxy = function(x, y) {
+    this.stopCursor();
     this.col = x;
     this.row = y;
+    this.startCursor();
   };
 
   /*
@@ -143,7 +188,14 @@ TextConsole = function() {
   this.hookUpKeyboardInput = function(object) {
     var t = this; 
     object.addEventListener('keyup', function(e) {
+      //alert(e.keyCode);
       switch (e.keyCode) {
+        case 8:   /* Backspace */
+          t.write('\b');
+          break;
+        case 13:  /* Enter */
+          t.write('\n');
+          break;
         case 38:  /* Up arrow */
           break;
         case 40:  /* Down arrow */
