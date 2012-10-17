@@ -1,4 +1,6 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
+
+# usage: mktone.pl | aplay
 
 ### GLOBALS ###
 
