@@ -1,0 +1,113 @@
+#!/usr/bin/env python
+
+"""A script to graft a bunch of directories into a staging area,
+getting their contents from a bunch of Mercurial repos.  Uses .hg_archival.txt
+to know when a grafted directory has not changed, and skips it then.
+This process is controlled by a configuration file with a terrible syntax:
+
+  destdir = repodir @ tag *"srcdir"
+
+The *"srcdir" is optional.  If given, it is some subdir of the repodir, and
+we graft in that dir instead of the root of the repo.
+
+For example:
+
+  docs = ../documents-repo @ tip
+  images = ../media-repo @ rel_7_2 *"img/current site"
+
+This script was used in the construction of Cat's Eye Technologies' website.
+But it doesn't really belong in Chrysoberyl or transmat anymore.
+Currently underemployed, it wanders amongst the riffraff in the Dipple.
+But we may find a place for it in the future...
+
+btw: No, the name of this script is not a Doctor Who reference.  While I am
+a huge Doctor Who fan, my personal Doctor Who canon terminates abruptly
+and absolutely as soon as Peripugilliam Brown opens her mouth and says
+"OHH, DOC-TERRR!"  There is nothing beyond that.  The words "Colin Baker"
+have no meaning for me.  The words "Sylvester Whatshisname" have no meaning
+for me.  And so forth.  The name of this script is simply a phrase in French.
+
+"""
+
+import os
+import re
+import sys
+from subprocess import check_call, Popen, PIPE
+
+
+def do_it(command):
+    print ">>> " + command
+    check_call(command, shell=True)
+
+
+def get_it(command):
+    print ">>> " + command
+    output = Popen(command, shell=True, stdout=PIPE).communicate()[0]
+    print output
+    return output
+
+
+class Externals(object):
+    def __init__(self, filename, user, host):
+        CFG_PATTERN = re.compile(r"^\s*(.*?)\s*\=\s*(.*?)\s*\@\s*(.*?)\s*(\*\s*\"(.*?)\")?\s*$")
+        self.externals = []
+        self.user = user
+        self.host = host
+        for line in open(filename):
+            match = CFG_PATTERN.match(line)
+            if match is not None:
+                dest = match.group(1)
+                src = match.group(2)
+                tag = match.group(3)
+                subdir = match.group(5)
+                self.externals.append({'src': src, 'dest': dest, 'tag': tag, 'subdir': subdir})
+
+    def delete(self):
+        staging_area = get_it('pwd').strip()
+        for e in self.externals:
+            dest = os.path.join(staging_area, e['dest'])
+            do_it('rm -rf %s' % dest)
+
+    def copy(self):
+        staging_area = get_it('pwd').strip()
+        for e in self.externals:
+            # if source clone doesn't exist, try to clone it from host
+            if not os.path.isdir(e['src']):
+                name = e['dest'].split('/')[1]
+                do_it('hg clone https://%s@%s/%s/%s %s' %
+                      (user, host, user, name, e['src']))
+            dest = os.path.join(staging_area, e['dest'])
+            arc_filename = os.path.join(dest, '.hg_archival.txt')
+            tag = None
+            f = None
+            try:
+                f = open(arc_filename, 'r')
+            except IOError:
+                pass
+            if f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith('tag: '):
+                        tag = line[5:].strip()
+                f.close()
+            if tag == e['tag']:
+                print "Tags match, not refreshing", e['src']
+                continue
+            do_it('rm -rf %s' % dest)
+            os.chdir(e['src'])
+            if e['subdir']:
+                tmp = '/tmp/' + dest
+                do_it('hg archive -r %s %s' % (e['tag'], tmp))
+                do_it('mv "%s/%s" %s' % (tmp, e['subdir'], dest))
+                do_it('cp %s/.hg_archival.txt %s' % (tmp, arc_filename))
+            else:
+                do_it('hg archive -r %s %s' % (e['tag'], dest))
+        os.chdir(staging_area)
+
+
+if __name__ == '__main__':
+    e = Externals("externals.cfg", 'catseye', 'bitbucket.org')
+    if sys.argv[1] == 'clean':
+        e.delete()
+    if sys.argv[1] == 'copy':
+        e.copy()
