@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+
+# A 2-player game based on the description here:
+# http://blog.computationalcomplexity.org/2012/11/a-simple-pspace-complete-problem.html
+
+import random
+
+class SetGame(object):
+    def __init__(self, num_sets=10, num_elems=10, density=0.4):
+        self.num_sets = num_sets
+        self.num_elems = num_elems
+        self.density = density
+        random.seed()
+        self.sets = []
+        for i in xrange(0, num_sets):
+            self.sets.append(self.random_set())
+    
+    def random_set(self):
+        s = set()
+        for i in xrange(0, int(self.num_elems * self.density)):
+            s.add(random.randint(0, self.num_elems - 1))
+        return s
+
+    def game_over(self):
+        for s in self.sets:
+            if len(s) > 0:
+                return False
+        return True
+
+    def perform_move(self, n):
+        t = self.sets[n].copy()
+        for s in self.sets:
+            s -= t
+
+    def show(self):
+        i = 0
+        for s in self.sets:
+            print "Set #%d: %s" % (i, sorted(list(s)))
+            i += 1
+
+    def move(self, player):
+        valid = False
+        while not valid:
+            s = raw_input("Player %d, select a set to remove: " % player)
+            try:
+                s = int(s)
+                if len(self.sets[s]) == 0:
+                    print "That set is empty.  Try a different one."
+                else:
+                    self.perform_move(int(s))
+                    valid = True
+            except (ValueError, IndexError):
+                print "Bad input!"
+        self.show()
+
+    def play(self):
+        player = 2
+        self.show()
+        while not self.game_over():
+            player = 3 - player
+            self.move(player)
+        print "Player %d won!" % player
+
+
+if __name__ == '__main__':
+    s = SetGame()
+    s.play()
