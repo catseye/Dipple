@@ -2,37 +2,19 @@
 <head>
   <meta charset="utf-8">
   <title>Javascript Inheritance</title>
+  <script src="inheritance.js"></script>
 </head>
 <body>
 
 <h1>Hi</h1>
 
 </body>
-  <script>
-    function inherit(Child, Parent) {
-        Child.prototype = new Parent();
-        Child.prototype['super'] = Parent;
-    }
-
-    function Thing() {
-        this.color = "yellow";
-        this.init = function(weight) {
-            this.weight = weight;
-        }
-        this.weigh = function() {
-            alert("this " + this.color + " thing weighs " + this.weight);
-        }
-    }
-    function Subthing() {
-        this.color = "brown";
-    }
-    Subthing.prototype = new Thing();
-
-    var st1 = new Subthing();
-    st1.init(40);
-    st1.weigh();
-    var st2 = new Subthing();
-    st2.init(20);
-    st2.weigh();
-    st1.weigh();
-  </script>
+<script>
+  var st1 = new Subthing();
+  st1.init(40);
+  st1.weigh();
+  var st2 = new Subthing();
+  st2.init(20);
+  st2.weigh();
+  st1.weigh();
+</script>

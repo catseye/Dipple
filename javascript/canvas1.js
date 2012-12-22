@@ -6,7 +6,7 @@ function CanvasExperiment1(canvas) {
     self.draw = function() {
       var ctx = canvas.getContext('2d');
 
-      $('#counter').html(counter);
+      document.getElementById('counter').innerHTML = counter;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
