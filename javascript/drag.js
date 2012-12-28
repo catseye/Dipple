@@ -48,20 +48,31 @@ Drag = function() {
     this.draw = function() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      ctx.shadowOffsetX = 10;
+      ctx.shadowOffsetY = 10;
+      ctx.shadowBlur = 15;
+
       for (var i = 0; i < boxes.length; i++) {
         var box = boxes[i];
-        ctx.fillStyle = box[4];
-        ctx.beginPath();
-        ctx.rect(box[0], box[1], box[2], box[3]);
-        ctx.closePath();
-        ctx.fill();
+        ctx.shadowColor = "black";
         if (i === selected) {
-          ctx.lineWidth = "3";
-          ctx.strokeStyle = "black";
-          ctx.rect(box[0], box[1], box[2], box[3]);
-          ctx.closePath();
-          ctx.stroke();
+          var max = box[2] > box[3] ? box[2] : box[3];
+          var gradient = ctx.createLinearGradient(
+            box[0], box[1], box[0]+max, box[1]+max
+          );
+          gradient.addColorStop(0, box[4]);
+          gradient.addColorStop(0.5, "white");
+          gradient.addColorStop(1, box[4]);
+          ctx.fillStyle = gradient;
+        } else {
+          ctx.fillStyle = box[4];
         }
+        ctx.fillRect(box[0], box[1], box[2], box[3]);
+
+        ctx.lineWidth = "1";
+        ctx.strokeStyle = "black";
+        ctx.shadowColor = "transparent";
+        ctx.strokeRect(box[0], box[1], box[2], box[3]);
       }
     };
 
