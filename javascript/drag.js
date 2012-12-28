@@ -2,6 +2,7 @@ Drag = function() {
     var interval_id = undefined;
     var ctx = undefined;
     var canvas = undefined;
+    var selected = undefined;
 
     var boxes = [
       [100, 100, 60, 60, "green"],
@@ -26,6 +27,7 @@ Drag = function() {
         for (var i = boxes.length-1; i >= 0; i--) {
           var box = boxes[i];
           if (hit(can_x, can_y, box)) {
+            selected = i;
             var off_x = box[0] - can_x;
             var off_y = box[1] - can_y;
             canvas.onmousemove = function(e) {
@@ -38,6 +40,7 @@ Drag = function() {
       }
       canvas.onmouseup = function() {
         canvas.onmousemove = null;
+        selected = undefined;
       };
       interval_id = setInterval(this.draw, 20);
     };
@@ -52,6 +55,13 @@ Drag = function() {
         ctx.rect(box[0], box[1], box[2], box[3]);
         ctx.closePath();
         ctx.fill();
+        if (i === selected) {
+          ctx.lineWidth = "3";
+          ctx.strokeStyle = "black";
+          ctx.rect(box[0], box[1], box[2], box[3]);
+          ctx.closePath();
+          ctx.stroke();
+        }
       }
     };
 
