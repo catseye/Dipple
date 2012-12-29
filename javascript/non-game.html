@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>HTML5 Canvas experiment #7</title>
+  <script src="non-game.js"></script>
+  <style>
+#canvas { border: 1px solid blue; }
+#status { background: #000060; color: white }
+  </style>
+</head>
+<body>
+
+<h1>A Non-Game</h1>
+
+<p id="status">Begin!</p>
+
+<canvas id="canvas" width="600" height="400">
+Your browser doesn't support displaying an HTML5 canvas.
+</canvas>
+
+</body>
+<script type="text/javascript">
+  (new NonGame()).init(document.getElementById('canvas'),
+                       document.getElementById('status'));
+</script>
