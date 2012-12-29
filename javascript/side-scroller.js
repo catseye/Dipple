@@ -5,15 +5,15 @@ SideScroller = function() {
     var tileWidth = 100;
     var tileHeight = 100;
     var scrollOffset = 0;
+    var shipX = 50;
+    var shipY = 200;
 
     var tileMap = [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 0, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 3, 2, 0, 1, 1, 2, 0],
-      [1, 1, 1, 1, 1, 1, 2, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1]
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 0, 1, 1, 2, 3, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 3, 2, 0, 1, 1, 1, 2, 0, 0, 0, 3, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 2, 0, 0, 1, 0, 0, 0, 0, 3, 2, 0, 0, 1, 1, 1, 0, 3, 0, 0, 0, 0, 0, 3, 1, 2, 0, 0, 0, 0, 0, 0]
     ];
-    var tileMapWidth = 18;
-    var tileMapHeight = 4;
 
     var drawTile = function(tileId, x, y) {
         switch (tileId) {
@@ -59,14 +59,23 @@ SideScroller = function() {
     this.draw = function() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // TODO: optimize this to only draw the tiles visible on the Canvas
-      for (var y = 0; y < tileMapHeight; y++) {
+      var status = document.getElementById('status');
+      var leftmost = Math.floor((0 - scrollOffset) / tileWidth);
+      var rightmost = leftmost + 7; // 600 / tileWidth + 1 for overlap
+      //status.innerHTML = "leftmost= " + leftmost + ", rightmost=" + rightmost;
+
+      for (var y = 0; y < tileMap.length; y++) {
         var row = tileMap[y];
-        for (var x = 0; x < tileMapWidth; x++) {
+        for (var x = leftmost; x < rightmost; x++) {
           drawTile(row[x], x * tileWidth + scrollOffset, y * tileHeight);
         }
       }
 
+      ctx.beginPath();
+      ctx.fillStyle = "yellow";
+      ctx.arc(shipX, shipY + Math.sin(scrollOffset / 20.0) * 50.0, 12, 0, 2 * Math.PI, false);
+      ctx.fill();
+      
       scrollOffset -= 1;
     };
 
