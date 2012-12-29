@@ -11,7 +11,7 @@
 
 <h1>A Scrolling Tiled Thing</h1>
 
-<canvas id="canvas" width="600" height="400">
+<canvas id="canvas" width="600" height="400" tabindex="0">
 Your browser doesn't support displaying an HTML5 canvas.
 </canvas>
 
@@ -19,5 +19,7 @@ Your browser doesn't support displaying an HTML5 canvas.
 
 </body>
 <script type="text/javascript">
-  (new SideScroller()).init(document.getElementById('canvas'));
+  var canvas = document.getElementById('canvas');
+  canvas.focus();
+  (new SideScroller()).init(canvas);
 </script>

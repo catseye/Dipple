@@ -7,6 +7,7 @@ SideScroller = function() {
     var scrollOffset = 0;
     var shipX = 50;
     var shipY = 200;
+    var delta = 0;
 
     var tileMap = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
@@ -49,11 +50,47 @@ SideScroller = function() {
             break;
         }
     }
-      
+
+    var checkCollide = function(tileId, inTileX, inTileY) {
+        switch (tileId) {
+          case 0:
+            return true;
+          case 1:
+            return false;
+          case 2:
+            return inTileX >= (tileHeight - inTileY);
+          case 3:
+            return inTileX <= inTileY;
+        }
+    }
+    
     this.init = function(c) {
       canvas = c;
       ctx = canvas.getContext("2d");
       interval_id = setInterval(this.draw, 20);
+
+      c.addEventListener('keydown', function(e) {
+        switch (e.keyCode) {
+          case 38:  /* Up arrow */
+            delta = -1;
+            e.cancelBubble = true;
+            break;
+          case 40:  /* Down arrow */
+            delta = 1;
+            e.cancelBubble = true;
+            break;
+        }
+      }, true);
+
+      c.addEventListener('keyup', function(e) {
+        switch (e.keyCode) {
+          case 38: case 40:
+            delta = 0;
+            e.cancelBubble = true;
+            break;
+        }
+      }, true);
+
     };
 
     this.draw = function() {
@@ -63,6 +100,12 @@ SideScroller = function() {
       var leftmost = Math.floor((0 - scrollOffset) / tileWidth);
       var rightmost = leftmost + 7; // 600 / tileWidth + 1 for overlap
       //status.innerHTML = "leftmost= " + leftmost + ", rightmost=" + rightmost;
+      var shipTileX =  Math.floor((shipX - scrollOffset) / tileWidth);
+      var shipTileY =  Math.floor(shipY / tileHeight);
+      var shipTile = tileMap[shipTileY][shipTileX];
+      var inTileX = (shipX - scrollOffset) - (shipTileX * tileWidth);
+      var inTileY = shipY - (shipTileY * tileHeight);
+      status.innerHTML = "ship tile X=" + shipTileX + ", Y=" + shipTileY + ", tile=" + shipTile + ", inTileX=" + inTileX + ", inTileY=" + inTileY;
 
       for (var y = 0; y < tileMap.length; y++) {
         var row = tileMap[y];
@@ -73,10 +116,14 @@ SideScroller = function() {
 
       ctx.beginPath();
       ctx.fillStyle = "yellow";
-      ctx.arc(shipX, shipY + Math.sin(scrollOffset / 20.0) * 50.0, 12, 0, 2 * Math.PI, false);
+      if (checkCollide(shipTile, inTileX, inTileY)) {
+        ctx.fillStyle = "red";
+      }
+      ctx.arc(shipX, shipY, 12, 0, 2 * Math.PI, false);
       ctx.fill();
-      
+
       scrollOffset -= 1;
+      shipY += delta * 2;
     };
 
 };
