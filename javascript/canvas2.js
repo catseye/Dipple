@@ -39,24 +39,23 @@ Playfield = function() {
     };
 };
 
-function CanvasExperiment2(canvas) {
-    var self = {};
+CanvasExperiment2 = function() {
     var p;
-    var interval_id;
+    var canvas;
+    var ctx;
+    var intervalId;
     var w = 40;
     var h = 40;
 
     var colors = ["red", "black", "green", "blue"];
 
-    self.draw = function() {
-        var ctx = canvas.getContext('2d');
-
+    this.draw = function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        var c = colors[Math.floor(Math.random() * 4)]
-        var x = Math.floor(Math.random() * 10)
-        var y = Math.floor(Math.random() * 10)
-        
+        var c = colors[Math.floor(Math.random() * colors.length)];
+        var x = Math.floor(Math.random() * 10);
+        var y = Math.floor(Math.random() * 10);
+
         if (Math.random() > 0.25) {
             p.put(x, y, c);
         } else {
@@ -71,11 +70,11 @@ function CanvasExperiment2(canvas) {
         });
     }
 
-    self.start = function() {
+    this.start = function(c) {
         p = new Playfield();
-        self.draw();
-        interval_id = setInterval(self.draw, 25);
+        canvas = c;
+        ctx = canvas.getContext('2d');
+        this.draw();
+        intervalId = setInterval(this.draw, 25);
     }
-
-    return self;
 }
