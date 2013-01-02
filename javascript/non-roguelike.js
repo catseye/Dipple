@@ -68,6 +68,7 @@ NonRoguelike = function() {
     var gold = 0;
     var w = 40;
     var h = 40;
+    var counter = 0;
 
     var WALL = {
         'draw': function(ctx, x, y) {
@@ -101,6 +102,9 @@ NonRoguelike = function() {
     };
 
     this.draw = function() {
+        w = 35 + Math.sin(counter) * 5;
+        h = 35 + Math.sin(Math.PI + counter) * 5;
+        counter += 0.05;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         p.foreach(function (x, y, thing) {
