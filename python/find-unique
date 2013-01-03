@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+
+"""
+Find unique files.
+
+Usage: find-unique a b
+
+List all files in a which are not to be found anywhere (under any name) in b.
+
+"""
+
+import hashlib
+import os
+import sys
+
+
+def md5(filename):
+    """Compute and return the MD5 hash of the named file.
+
+    """
+    hash = hashlib.md5()
+    file = open(filename, "r")
+    eof = False
+    while not eof:
+        data = file.read(128)
+        if data:
+            hash.update(data)
+        else:
+            eof = True
+    file.close()
+    return hash.hexdigest()
+
+
+def build_hashmap(dir):
+    hashmap = {}
+    for root, dirs, files in os.walk(dir):
+        for filename in files:
+            full = os.path.normpath(os.path.join(root, filename))
+            hash = md5(full)
+            hashmap.setdefault(hash, []).append(full)
+    return hashmap
+
+
+### MAIN ###
+
+def main(argv):
+    a = build_hashmap(argv[1])
+    b = build_hashmap(argv[2])
+    for hash in a:
+        if hash not in b:
+            for filename in a[hash]:
+                print filename
+
+if __name__ == '__main__':
+    main(sys.argv)
