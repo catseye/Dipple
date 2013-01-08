@@ -1,6 +1,7 @@
 // requires playfield.js
 NonRoguelike = function() {
-    var p;
+    var map;
+    var actors;
     var canvas;
     var ctx;
     var intervalId;
@@ -10,22 +11,25 @@ NonRoguelike = function() {
     var w = 40;
     var h = 40;
     var counter = 0;
+    var state = undefined;
 
     var WALL = {
         'draw': function(ctx, x, y) {
-            ctx.beginPath();
             ctx.fillStyle = "black";
             ctx.fillRect(x * w, y * h, w, h);
         },
-        'pass': function() { return false; }
+        'pass': function(x, y) {
+            return false;
+        }
     };
 
-    var HERO = {
+    var DOOR = {
         'draw': function(ctx, x, y) {
-            ctx.beginPath();
-            ctx.fillStyle = "blue";
-            ctx.arc(x * w + (w / 2), y * h + (h / 2), w/2, 0, 2 * Math.PI, false);
-            ctx.fill();
+            ctx.fillStyle = "brown";
+            ctx.fillRect(x * w, y * h, w, h);
+        },
+        'pass': function(x, y) {
+            return true;
         }
     };
 
@@ -39,55 +43,93 @@ NonRoguelike = function() {
             ctx.closePath();
             ctx.fill();
         },
-        'pass': function() { gold += 10; return true; }
+        'pass': function(x, y) {
+            map.put(x, y, undefined);
+            gold += 10;
+            return true; 
+        }
+    };
+
+    var HERO = {
+        'draw': function(ctx, x, y) {
+            ctx.beginPath();
+            ctx.fillStyle = "blue";
+            ctx.arc(x * w + (w / 2), y * h + (h / 2), w/2, 0, 2 * Math.PI, false);
+            ctx.fill();
+        }
+    };
+
+    var MONSTER = {
+        'draw': function(ctx, x, y) {
+            ctx.beginPath();
+            ctx.fillStyle = "green";
+            ctx.arc(x * w + (w / 2), y * h + (h / 2), w/2, 0, 2 * Math.PI, false);
+            ctx.fill();
+        }
     };
 
     this.draw = function() {
+        /*
         w = 35 + Math.sin(counter) * 5;
         h = 35 + Math.sin(Math.PI + counter) * 5;
         counter += 0.05;
+        */
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        p.foreach(function (x, y, thing) {
-            thing['draw'](ctx, x, y);
+        map.foreach(function (x, y, thing) {
+            thing.draw(ctx, x, y);
+        });
+        actors.foreach(function (x, y, actor) {
+            actor.draw(ctx, x, y);
         });
     }
 
     this.moveHero = function(dx, dy) {
         var newHeroX = heroX + dx;
         var newHeroY = heroY + dy;
-        var thing = p.get(newHeroX, newHeroY);
-        var pass = (thing === undefined) ? true : thing['pass']();
+        var thing = map.get(newHeroX, newHeroY);
+        var pass = true;
+        if (thing !== undefined) {
+            pass = thing.pass(newHeroX, newHeroY);
+        }
+        var creature = actors.get(newHeroX, newHeroY);
+        if (creature !== undefined) {
+            document.getElementById('status').innerHTML = "FighT!";
+            pass = false;
+        }
         if (pass) {
-            p.put(heroX, heroY, undefined);
+            actors.put(heroX, heroY, undefined);
             heroX = newHeroX;
             heroY = newHeroY;
-            p.put(heroX, heroY, HERO);
+            actors.put(heroX, heroY, HERO);
             document.getElementById('status').innerHTML = "Gold: " + gold;
         }
     };
 
     this.start = function(c) {
-        p = new Playfield();
-        var map = {
+        map = new Playfield();
+        var legend = {
             ' ': undefined,
             '*': WALL,
-            '$': GOLD
+            '$': GOLD,
+            '+': DOOR
         };
-        p.load(0, 0, map,
+        map.load(0, 0, legend,
           "***************\n" +
           "*    *        *\n" +
           "*    *        *\n" +
           "*    *  $     *\n" +
           "*** **        *\n" +
-          "*** ******** **\n" +
+          "*** ********+**\n" +
           "*** **        *\n" +
-          "***           *\n" +
+          "***  +        *\n" +
           "******        *\n" +
           "***************\n"
         );
 
-        p.put(heroX, heroY, HERO);
+        actors = new Playfield();
+        actors.put(heroX, heroY, HERO);
+        actors.put(10, 2, MONSTER);
 
         canvas = c;
         ctx = canvas.getContext('2d');
