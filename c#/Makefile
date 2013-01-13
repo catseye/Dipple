@@ -1,6 +1,6 @@
 CSC?=gmcs
 
-all: test.exe bigint.exe pair.exe
+all: test.exe pair.exe ref.exe
 
 test.exe: test.cs
 	$(CSC) test.cs -out:test.exe
@@ -11,6 +11,9 @@ bigint.exe: bigint.cs
 
 pair.exe: pair.cs
 	$(CSC) pair.cs -out:pair.exe
+
+ref.exe: ref.cs
+	$(CSC) ref.cs -out:ref.exe
 
 clean:
 	rm -f *.exe
