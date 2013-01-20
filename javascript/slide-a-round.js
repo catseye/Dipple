@@ -48,15 +48,68 @@ Actor = function() {
     };
 };
 
+Joystick = function() {
+    this.init = function() {
+        this.dx = 0;
+        this.dy = 0;
+        this.fire = 0;
+    };
+
+    this.attach = function(element) {
+        var self = this;
+        element.addEventListener('keydown', function(e) {
+          switch (e.keyCode) {
+            case 38:  /* Up arrow */
+              self.dy = -1;
+              e.cancelBubble = true;
+              break;
+            case 40:  /* Down arrow */
+              self.dy = 1;
+              break;
+            case 37:  /* Left arrow */
+              self.dx = -1;
+              break;
+            case 39:  /* Right arrow */
+              self.dx = 1;
+              break;
+          }
+        }, true);
+        element.addEventListener('keyup', function(e) {
+          switch (e.keyCode) {
+            case 38:  /* Up arrow */
+              self.dy = 0;
+              e.cancelBubble = true;
+              break;
+            case 40:  /* Down arrow */
+              self.dy = 0;
+              e.cancelBubble = true;
+              break;
+            case 37:  /* Left arrow */
+              self.dx = 0;
+              e.cancelBubble = true;
+              break;
+            case 39:  /* Right arrow */
+              self.dx = 0;
+              e.cancelBubble = true;
+              break;
+          }
+        }, true);
+    };
+};
+
 SlideARound = function() {
     var actors;
     var canvas;
     var ctx;
     var intervalId;
     var counter = 0;
+    var joystick;
 
     this.draw = function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        document.getElementById('status').innerHTML = joystick.dx + "," + joystick.dy;
+        actors[0].setStateMoving(joystick.dx, joystick.dy);
 
         for (var i = 0; i < actors.length; i++) {
             actors[i].draw(ctx);
@@ -72,27 +125,10 @@ SlideARound = function() {
         canvas = c;
         ctx = canvas.getContext('2d');
 
-        canvas.addEventListener('keydown', function(e) {
-          switch (e.keyCode) {
-            case 38:  /* Up arrow */
-              actors[0].setStateMoving(0, -1);
-              e.cancelBubble = true;
-              break;
-            case 40:  /* Down arrow */
-              actors[0].setStateMoving(0, 1);
-              e.cancelBubble = true;
-              break;
-            case 37:  /* Left arrow */
-              actors[0].setStateMoving(-1, 0);
-              e.cancelBubble = true;
-              break;
-            case 39:  /* Right arrow */
-              actors[0].setStateMoving(1, 0);
-              e.cancelBubble = true;
-              break;
-          }
-        }, true);
+        joystick = new Joystick();
+        joystick.init();
+        joystick.attach(canvas);
 
-        intervalId = setInterval(this.draw, 25);
+        intervalId = setInterval(this.draw, 1000.0/60.0);
     }
 }
