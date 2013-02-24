@@ -97,7 +97,7 @@ RetroBitMap = function() {
         }
         var lastly = new Date().getTime();
         status.innerHTML = 'draw: ' + (middle-start) + 'ms, update: ' + (lastly-middle) + 'ms';
-    }
+    };
 
     this.start = function(c) {
         p = new Playfield();
@@ -109,8 +109,35 @@ RetroBitMap = function() {
         canvas = c;
         var self = this;
         img.onload = function() {
+            self.createColoredCharsets();
             intervalId = setInterval(function() { self.drawFrame(); }, 1000/fps);
         }
         img.src = 'charset16.png';
-    }
-}
+    };
+
+    this.createColoredCharsets = function() {
+        var charset_0 = document.getElementById('charset_0');
+        var charset_0_ctx = charset_0.getContext('2d');
+        var charset_1 = document.getElementById('charset_1');
+        var charset_1_ctx = charset_1.getContext('2d');
+        charset_0_ctx.drawImage(img, 0, 0, 128, 16);
+        var imageData = charset_0_ctx.getImageData(0, 0, 128, 16);
+        var w = imageData.width;
+        var h = imageData.height;
+        var newData = charset_0_ctx.getImageData(0, 0, 128, 16);
+        for (var y = 0; y < h; y++) {
+            for (var x = 0; x < w; x++) {
+                var index = (y * w + x) * 4;
+                var red = imageData.data[index];
+                var green = imageData.data[index + 1];
+                var blue = imageData.data[index + 2];
+                var alpha = imageData.data[index + 3];
+                newData.data[index] = 255;
+                newData.data[index + 1] = 0;
+                newData.data[index + 2] = 0;
+                newData.data[index + 3] = alpha;
+            }
+        }
+        charset_1_ctx.putImageData(newData, 0, 0);
+    };
+};
