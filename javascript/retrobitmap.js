@@ -41,7 +41,10 @@ RetroBitMap = function() {
     var intervalId;
     var scaleX = 2;
     var scaleY = 2;
-  
+    var charWidth = 8;
+    var charHeight = 8;
+    var srcCharsPerRow = 8;
+
     var img = new Image();
 
     var colors = [
@@ -96,13 +99,16 @@ RetroBitMap = function() {
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
                 ctx.fillStyle = colors[bgColorMemory[x + y * width] || 0];
-                ctx.fillRect(x * 16, y * 16, 16, 16);
+                ctx.fillRect(x * charWidth * scaleX, y * charHeight * scaleY,
+                             charWidth * scaleX, charHeight * scaleY);
                 /* blit character image */
                 var charNum = characterMemory[x + y * width] || 0;
-                /* if img is charset8, use 8's in the source, but not the dest */
+                var srcCharX = (charNum % srcCharsPerRow) * charWidth;
+                var srcCharY = Math.floor(charNum / srcCharsPerRow) * charHeight;
                 ctx.drawImage(chargen[fgColorMemory[x + y * width] || 0],
-                  /* source */ charNum * 16, 0, 16, 16,
-                  /* dest   */ x * 16, y * 16, 16, 16);
+                  /* source */ srcCharX, srcCharY, charWidth, charHeight,
+                  /* dest   */ x * charWidth * scaleX, y * charHeight * scaleY,
+                               charWidth * scaleX, charHeight * scaleY);
             }
         }
         var middle = new Date().getTime();
@@ -110,7 +116,7 @@ RetroBitMap = function() {
             for (var y = 0; y < height; y++) {
                 var bgColorNum = Math.floor(Math.random() * colors.length);
                 var fgColorNum = Math.floor(Math.random() * colors.length);
-                var charNum = Math.floor(Math.random() * 8);
+                var charNum = Math.floor(Math.random() * srcCharsPerRow);
                 this.setBgColor(bgColorNum);
                 this.setFgColor(fgColorNum);
                 this.plot(x, y, charNum);
@@ -132,22 +138,22 @@ RetroBitMap = function() {
             self.createColoredCharsets();
             intervalId = setInterval(function() { self.drawFrame(); }, 1000/fps);
         }
-        img.src = 'charset16.png';
+        img.src = 'charset8.png';
     };
 
     this.createColoredCharsets = function() {
         var charset_0 = document.getElementById('charset_0');
         var charset_0_ctx = charset_0.getContext('2d');
         chargen[0] = charset_0;
-        charset_0_ctx.drawImage(img, 0, 0, 128, 16);
-        var imageData = charset_0_ctx.getImageData(0, 0, 128, 16);
+        charset_0_ctx.drawImage(img, 0, 0, img.width, img.height);
+        var imageData = charset_0_ctx.getImageData(0, 0, img.width, img.height);
         var w = imageData.width;
         var h = imageData.height;
         for (var color = 1; color < 8; color++) {
             var charset = document.getElementById('charset_' + color);
             chargen[color] = charset;
             var charset_ctx = charset.getContext('2d');
-            var newData = charset_0_ctx.getImageData(0, 0, 128, 16);
+            var newData = charset_0_ctx.getImageData(0, 0, img.width, img.height);
             for (var y = 0; y < h; y++) {
                 for (var x = 0; x < w; x++) {
                     var index = (y * w + x) * 4;
