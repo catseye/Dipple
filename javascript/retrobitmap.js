@@ -1,3 +1,39 @@
+/*
+
+60 fps is 16.666 msec per frame.
+50 fps is 20 msec per frame.
+30 fps is 33.333 msec per frame.
+
+Trying to draw all 320x200 pixels per frame takes about 360ms per frame
+(on Firefox 19 on Ubuntu 12.04, 2.1GHz x 2 laptop), at least by drawing
+them each as a rectangle, so that's out.  But dividing the screen up into
+"programmable" characters ought to be much faster.
+
+Indeed, if they are just 8x8 pixels of a solid colour, the entire 40x25
+screen can be updated in typ. less than 16 msec, meaning it can support
+a frame rate of 60 fps.
+
+If each also has a character blitted onto it, the screen can be updated
+in typ. 26 msec, which is not quite inside 50 fps, but comfortably inside
+30 fps.
+
+Not scaling while blitting the character seem to make it slightly faster
+(21 msec) but this is with the same 8x8 pixel source.  With a 16x16 pixel
+source, it's comparable (23 msec?), so it's not all in the scaling.  (Also,
+scaling anti-aliases the edges, which looks slightly un-retro.)
+
+(Also these measurements are being taken at 5 fps, which seems to make
+the update routine take more time, Omaha knows why.)
+
+I'm sure we could add some (16?) larger (64x64?) sprites onto here with
+few problems, especially if we're OK with 30fps.
+
+One unsolved problem is changing the foreground colour (colour of the
+character.)  If we're blitting from a fixed image, that's fixed.  Probably?
+I'll go looking.
+
+*/
+
 RetroBitMap = function() {
     var p;
     var canvas;
@@ -19,7 +55,8 @@ RetroBitMap = function() {
       "#ffffff"
     ];
 
-    var backingStore = new Array();
+    var colorMemory = new Array();
+    var characterMemory = new Array();
     var width = 40;
     var height = 25;
     this.color = 0;
@@ -28,45 +65,34 @@ RetroBitMap = function() {
         this.color = c;
     };
 
-    this.plot = function(x, y) {
-        backingStore[x + y * width] = this.color;
+    this.plot = function(x, y, charnum) {
+        colorMemory[x + y * width] = this.color;
+        characterMemory[x + y * width] = charnum;
     };
 
     this.drawFrame = function() {
         var status = document.getElementById('status');
         var start = new Date().getTime();
         var c;
-        // trying to draw all 320x200 pixels per frame takes about
-        // 360ms per frame
-        /*
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
-                ctx.fillStyle = colors[backingStore[x + y * width] || 0];
-                ctx.fillRect(x * 2, y * 2, 2, 2);
-            }
-        }
-        */
-        for (var x = 0; x < width; x++) {
-            for (var y = 0; y < height; y++) {
-                ctx.fillStyle = colors[backingStore[x + y * width] || 0];
+                ctx.fillStyle = colors[colorMemory[x + y * width] || 0];
                 ctx.fillRect(x * 16, y * 16, 16, 16);
+                /* blit character image */
+                var charNum = characterMemory[x + y * width] || 0;
+                /* if img is charset8, use 8's in the source, but not the dest */
+                ctx.drawImage(img,
+                  /* source */ charNum * 16, 0, 16, 16,
+                  /* dest   */ x * 16, y * 16, 16, 16);
             }
         }
         var middle = new Date().getTime();
-        /*
-        for (var i = 0; i < 1000; i++) {
-            x = Math.floor(Math.random() * width);
-            y = Math.floor(Math.random() * height);
-            c = Math.floor(Math.random() * colors.length);
-            this.setColor(c);
-            this.plot(x, y);
-        }
-        */
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
-                c = Math.floor(Math.random() * colors.length);
-                this.setColor(c);
-                this.plot(x, y);
+                var colorNum = Math.floor(Math.random() * colors.length);
+                var charNum = Math.floor(Math.random() * 8);
+                this.setColor(colorNum);
+                this.plot(x, y, charNum);
             }
         }
         var lastly = new Date().getTime();
@@ -79,17 +105,12 @@ RetroBitMap = function() {
         ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         var self = this;
-        var fps = 60;
+        var fps = 50;
         canvas = c;
         var self = this;
-        /*
         img.onload = function() {
-            //self.draw();
-            //interval_id = setInterval(self.draw, 20);
             intervalId = setInterval(function() { self.drawFrame(); }, 1000/fps);
         }
-        img.src = 'charset.png';
-        */
-        intervalId = setInterval(function() { self.drawFrame(); }, 1000/fps);
+        img.src = 'charset16.png';
     }
 }
