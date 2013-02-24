@@ -2,12 +2,10 @@
 <head>
   <meta charset="utf-8">
   <title>RetroBitMap</title>
-  <script src="playfield.js"></script>
   <script src="retrobitmap.js"></script>
   <style>
 #canvas { border: 1px solid blue; }
-#charset_0 { border: 1px solid red; }
-#charset_1 { border: 1px solid green; }
+.charset { display: none; }
   </style>
 </head>
 <body>
@@ -19,8 +17,14 @@ Your browser doesn't support displaying an HTML5 canvas.
 </canvas>
 <p id="status">ready</p>
 
-<canvas id="charset_0"></canvas>
-<canvas id="charset_1"></canvas>
+<canvas class="charset" id="charset_0"></canvas>
+<canvas class="charset" id="charset_1"></canvas>
+<canvas class="charset" id="charset_2"></canvas>
+<canvas class="charset" id="charset_3"></canvas>
+<canvas class="charset" id="charset_4"></canvas>
+<canvas class="charset" id="charset_5"></canvas>
+<canvas class="charset" id="charset_6"></canvas>
+<canvas class="charset" id="charset_7"></canvas>
 
 </body>
 <script>

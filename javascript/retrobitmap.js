@@ -28,14 +28,14 @@ the update routine take more time, Omaha knows why.)
 I'm sure we could add some (16?) larger (64x64?) sprites onto here with
 few problems, especially if we're OK with 30fps.
 
-One unsolved problem is changing the foreground colour (colour of the
-character.)  If we're blitting from a fixed image, that's fixed.  Probably?
-I'll go looking.
+To support 8 foreground colours, we copy the original charset bitmap
+(black) into one of 8 hidden canvases, and use canvas pixel operations
+to copy it into each of the other 7, using a different destination colour
+in each.
 
 */
 
 RetroBitMap = function() {
-    var p;
     var canvas;
     var ctx;
     var intervalId;
@@ -55,18 +55,37 @@ RetroBitMap = function() {
       "#ffffff"
     ];
 
-    var colorMemory = new Array();
+    var colorTriples = [
+      [0, 0, 0],
+      [0, 0, 255],
+      [0, 255, 0],
+      [0, 255, 255],
+      [255, 0, 0],
+      [255, 0, 255],
+      [255, 255, 0],
+      [255, 255, 255]
+    ];
+
+    var bgColorMemory = new Array();
+    var fgColorMemory = new Array();
     var characterMemory = new Array();
+    var chargen = new Array();
     var width = 40;
     var height = 25;
-    this.color = 0;
+    this.bgColor = 0;
+    this.fgColor = 0;
 
-    this.setColor = function(c) {
-        this.color = c;
+    this.setBgColor = function(c) {
+        this.bgColor = c;
+    };
+
+    this.setFgColor = function(c) {
+        this.fgColor = c;
     };
 
     this.plot = function(x, y, charnum) {
-        colorMemory[x + y * width] = this.color;
+        fgColorMemory[x + y * width] = this.fgColor;
+        bgColorMemory[x + y * width] = this.bgColor;
         characterMemory[x + y * width] = charnum;
     };
 
@@ -76,12 +95,12 @@ RetroBitMap = function() {
         var c;
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
-                ctx.fillStyle = colors[colorMemory[x + y * width] || 0];
+                ctx.fillStyle = colors[bgColorMemory[x + y * width] || 0];
                 ctx.fillRect(x * 16, y * 16, 16, 16);
                 /* blit character image */
                 var charNum = characterMemory[x + y * width] || 0;
                 /* if img is charset8, use 8's in the source, but not the dest */
-                ctx.drawImage(img,
+                ctx.drawImage(chargen[fgColorMemory[x + y * width] || 0],
                   /* source */ charNum * 16, 0, 16, 16,
                   /* dest   */ x * 16, y * 16, 16, 16);
             }
@@ -89,9 +108,11 @@ RetroBitMap = function() {
         var middle = new Date().getTime();
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
-                var colorNum = Math.floor(Math.random() * colors.length);
+                var bgColorNum = Math.floor(Math.random() * colors.length);
+                var fgColorNum = Math.floor(Math.random() * colors.length);
                 var charNum = Math.floor(Math.random() * 8);
-                this.setColor(colorNum);
+                this.setBgColor(bgColorNum);
+                this.setFgColor(fgColorNum);
                 this.plot(x, y, charNum);
             }
         }
@@ -100,7 +121,6 @@ RetroBitMap = function() {
     };
 
     this.start = function(c) {
-        p = new Playfield();
         canvas = c;
         ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -118,26 +138,30 @@ RetroBitMap = function() {
     this.createColoredCharsets = function() {
         var charset_0 = document.getElementById('charset_0');
         var charset_0_ctx = charset_0.getContext('2d');
-        var charset_1 = document.getElementById('charset_1');
-        var charset_1_ctx = charset_1.getContext('2d');
+        chargen[0] = charset_0;
         charset_0_ctx.drawImage(img, 0, 0, 128, 16);
         var imageData = charset_0_ctx.getImageData(0, 0, 128, 16);
         var w = imageData.width;
         var h = imageData.height;
-        var newData = charset_0_ctx.getImageData(0, 0, 128, 16);
-        for (var y = 0; y < h; y++) {
-            for (var x = 0; x < w; x++) {
-                var index = (y * w + x) * 4;
-                var red = imageData.data[index];
-                var green = imageData.data[index + 1];
-                var blue = imageData.data[index + 2];
-                var alpha = imageData.data[index + 3];
-                newData.data[index] = 255;
-                newData.data[index + 1] = 0;
-                newData.data[index + 2] = 0;
-                newData.data[index + 3] = alpha;
+        for (var color = 1; color < 8; color++) {
+            var charset = document.getElementById('charset_' + color);
+            chargen[color] = charset;
+            var charset_ctx = charset.getContext('2d');
+            var newData = charset_0_ctx.getImageData(0, 0, 128, 16);
+            for (var y = 0; y < h; y++) {
+                for (var x = 0; x < w; x++) {
+                    var index = (y * w + x) * 4;
+                    var red = imageData.data[index];
+                    var green = imageData.data[index + 1];
+                    var blue = imageData.data[index + 2];
+                    var alpha = imageData.data[index + 3];
+                    newData.data[index] = colorTriples[color][0];
+                    newData.data[index + 1] = colorTriples[color][1];
+                    newData.data[index + 2] = colorTriples[color][2];
+                    newData.data[index + 3] = alpha;
+                }
             }
+            charset_ctx.putImageData(newData, 0, 0);
         }
-        charset_1_ctx.putImageData(newData, 0, 0);
     };
 };
