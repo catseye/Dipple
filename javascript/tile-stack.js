@@ -7,6 +7,11 @@ TileStack = function() {
     var w = 40;
     var h = 40;
     var depth = 6;
+    var timer = 0;
+    var selTileX = undefined;
+    var selTileY = undefined;
+
+    var colors = ["red", "yellow", "green", "blue"];
 
     this.drawTile = function(tileX, tileY, tileZ, color) {
         ctx.beginPath();
@@ -46,20 +51,58 @@ TileStack = function() {
     this.draw = function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        this.drawTile(3, 3, 0, "red");
-        this.drawTile(4, 3, 0, "blue");
-        this.drawTile(4, 3, 1, "red");
-        this.drawTile(5, 3, 0, "yellow");
-        this.drawTile(5, 3, 1, "red");
-        this.drawTile(5, 3, 2, "blue");
-        this.drawTile(5, 4, 0, "blue");
+        var c = colors[Math.floor(Math.random() * colors.length)];
+        var x = Math.floor(Math.random() * 13) + 1;
+        var y = Math.floor(Math.random() * 8) + 1;
+
+        if (timer % 10 === 0) {
+            if (Math.random() > 0.25) {
+                var stack = p.get(x, y);
+                if (stack === undefined) {
+                    stack = [];
+                    p.put(x, y, stack);
+                }
+                stack.push(c);
+                //p.put(x, y, [c]);
+            } else {
+                var stack = p.get(x, y);
+                if (stack !== undefined) {
+                    stack.pop();
+                }
+            }
+        }
+        timer++;
+
+        var self = this;
+        p.foreach(function (x, y, value) {
+            for (var i = 0; i < value.length; i++) {
+                var c = value[i];
+                if (selTileX === x && selTileY === y) {
+                    c = "purple";
+                }
+                self.drawTile(x, y, i, c);
+            }
+        });
+
     };
 
     this.start = function(c) {
         p = new Playfield();
         canvas = c;
         ctx = canvas.getContext('2d');
-        this.draw();
+
+        canvas.onmousedown = function(e) {
+          var can_x = e.pageX - canvas.offsetLeft;
+          var can_y = e.pageY - canvas.offsetTop;
+          
+          selTileX = Math.floor(can_x / w);
+          selTileY = Math.floor(can_y / h);
+          self.drawTile(tileX, tileY, 0, "purple");
+        }
+        canvas.onmouseup = function() {
+          selTileX = selTileY = undefined;
+        };
+
         var self = this;
         intervalId = setInterval(function() { self.draw(); }, 33);
     };
