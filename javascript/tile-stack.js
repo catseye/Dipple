@@ -10,8 +10,15 @@ TileStack = function() {
     var timer = 0;
     var selTileX = undefined;
     var selTileY = undefined;
+    var selTileZ = undefined;
 
     var colors = ["red", "yellow", "green", "blue"];
+
+    this.tileContainsPoint = function(tileX, tileY, tileZ, ptX, ptY) {
+        var xLeft = tileX * w - (depth * tileZ);
+        var yTop = tileY * h - (depth * tileZ);
+        return ptX > xLeft && ptX < xLeft + w && ptY > yTop && ptY < yTop + h;
+    }
 
     this.drawTile = function(tileX, tileY, tileZ, color) {
         ctx.beginPath();
@@ -77,7 +84,7 @@ TileStack = function() {
         p.foreach(function (x, y, value) {
             for (var i = 0; i < value.length; i++) {
                 var c = value[i];
-                if (selTileX === x && selTileY === y) {
+                if (selTileX === x && selTileY === y && selTileZ === i) {
                     c = "purple";
                 }
                 self.drawTile(x, y, i, c);
@@ -90,20 +97,27 @@ TileStack = function() {
         p = new Playfield();
         canvas = c;
         ctx = canvas.getContext('2d');
+        var self = this;
 
         canvas.onmousedown = function(e) {
-          var can_x = e.pageX - canvas.offsetLeft;
-          var can_y = e.pageY - canvas.offsetTop;
-          
-          selTileX = Math.floor(can_x / w);
-          selTileY = Math.floor(can_y / h);
-          self.drawTile(tileX, tileY, 0, "purple");
+            var can_x = e.pageX - canvas.offsetLeft;
+            var can_y = e.pageY - canvas.offsetTop;
+
+            p.foreach(function (x, y, value) {
+                var z = value.length - 1;
+                if (self.tileContainsPoint(x, y, z, can_x, can_y)) {
+                    if (selTileZ === undefined || z > selTileZ) {
+                        selTileX = x;
+                        selTileY = y;
+                        selTileZ = z;
+                    }
+                }
+            });
         }
         canvas.onmouseup = function() {
-          selTileX = selTileY = undefined;
+            selTileX = selTileY = selTileZ = undefined;
         };
 
-        var self = this;
         intervalId = setInterval(function() { self.draw(); }, 33);
     };
 }
