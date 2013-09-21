@@ -73,9 +73,9 @@ class Externals(object):
         for e in self.externals:
             # if source clone doesn't exist, try to clone it from host
             if not os.path.isdir(e['src']):
-                name = e['dest'].split('/')[1]
+                name = e['dest'].split('/')[-1]
                 do_it('hg clone https://%s@%s/%s/%s %s' %
-                      (user, host, user, name, e['src']))
+                      (self.user, self.host, self.user, name, e['src']))
             dest = os.path.join(staging_area, e['dest'])
             arc_filename = os.path.join(dest, '.hg_archival.txt')
             tag = None
