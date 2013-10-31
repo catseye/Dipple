@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+
+"""
+For each file somewhere in a, list all duplicates of it somewhere in b.
+
+a may be somewhere inside b.  a will not be traversed during b traveral.
+
+Usage: find-dups2 a b
+"""
+
+import hashlib
+import os
+import sys
+
+
+def md5(filename):
+    """Compute and return the MD5 hash of the named file.
+
+    """
+    hash = hashlib.md5()
+    file = open(filename, "r")
+    eof = False
+    while not eof:
+        data = file.read(128)
+        if data:
+            hash.update(data)
+        else:
+            eof = True
+    file.close()
+    return hash.hexdigest()
+
+
+def build_hashmap(dir, exclude=None):
+    hashmap = {}
+    for root, dirs, files in os.walk(dir):
+        if os.path.normpath(root) == exclude:
+            print "(skipping %s)" % exclude
+            dirs[:] = []
+        else:
+            for filename in files:
+                full = os.path.normpath(os.path.join(root, filename))
+                try:
+                    hash = md5(full)
+                    hashmap.setdefault(hash, []).append(full)
+                except IOError as e:
+                    print str(e)
+    return hashmap
+
+
+### MAIN ###
+
+
+def main(argv):
+    dir_a = os.path.normpath(argv[1])
+    dir_b = os.path.normpath(argv[2])
+    print "traversing %s..." % dir_a
+    a = build_hashmap(dir_a)
+    print "traversing %s..." % dir_b
+    b = build_hashmap(dir_b, exclude=dir_a)
+    print ""
+    for hash in a:
+        if hash in b:
+            for filename in a[hash]:
+                print filename
+            print "... duplicated in :"
+            for filename in b[hash]:
+                print filename
+            print ""
+
+if __name__ == '__main__':
+    main(sys.argv)

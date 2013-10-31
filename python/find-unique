@@ -36,15 +36,20 @@ def build_hashmap(dir):
     for root, dirs, files in os.walk(dir):
         for filename in files:
             full = os.path.normpath(os.path.join(root, filename))
-            hash = md5(full)
-            hashmap.setdefault(hash, []).append(full)
+            try:
+                hash = md5(full)
+                hashmap.setdefault(hash, []).append(full)
+            except IOError as e:
+                print str(e)
     return hashmap
 
 
 ### MAIN ###
 
 def main(argv):
+    print "traversing %s..." % argv[1]
     a = build_hashmap(argv[1])
+    print "traversing %s..." % argv[2]
     b = build_hashmap(argv[2])
     for hash in a:
         if hash not in b:
