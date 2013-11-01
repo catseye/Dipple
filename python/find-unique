@@ -7,6 +7,8 @@ Usage: find-unique a b
 
 List all files in a which are not to be found anywhere (under any name) in b.
 
+a may be somewhere inside b.  a will not be traversed during b traveral.
+
 """
 
 import hashlib
@@ -31,26 +33,32 @@ def md5(filename):
     return hash.hexdigest()
 
 
-def build_hashmap(dir):
+def build_hashmap(dir, exclude=None):
     hashmap = {}
     for root, dirs, files in os.walk(dir):
-        for filename in files:
-            full = os.path.normpath(os.path.join(root, filename))
-            try:
-                hash = md5(full)
-                hashmap.setdefault(hash, []).append(full)
-            except IOError as e:
-                print str(e)
+        if os.path.normpath(root) == exclude:
+            print "(skipping %s)" % exclude
+            dirs[:] = []
+        else:
+            for filename in files:
+                full = os.path.normpath(os.path.join(root, filename))
+                try:
+                    hash = md5(full)
+                    hashmap.setdefault(hash, []).append(full)
+                except IOError as e:
+                    print str(e)
     return hashmap
 
 
 ### MAIN ###
 
 def main(argv):
-    print "traversing %s..." % argv[1]
-    a = build_hashmap(argv[1])
-    print "traversing %s..." % argv[2]
-    b = build_hashmap(argv[2])
+    dir_a = os.path.normpath(argv[1])
+    dir_b = os.path.normpath(argv[2])
+    print "traversing %s..." % dir_a
+    a = build_hashmap(dir_a)
+    print "traversing %s..." % dir_b
+    b = build_hashmap(dir_b, exclude=dir_a)
     for hash in a:
         if hash not in b:
             for filename in a[hash]:
