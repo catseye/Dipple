@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+"""
+Create an index to speed up finding duplicate files.
+
+Usage: mk-dups-index dir >index.txt
+
+NOTE 1: if the contents of 'dir' changes, you need to re-make the index.
+NOTE 2: the contents of 'dir' need not be unique.
+
+"""
+
+import hashlib
+import os
+import sys
+
+
+def md5(filename):
+    """Compute and return the MD5 hash of the named file.
+
+    """
+    hash = hashlib.md5()
+    file = open(filename, "r")
+    eof = False
+    while not eof:
+        data = file.read(128)
+        if data:
+            hash.update(data)
+        else:
+            eof = True
+    file.close()
+    return hash.hexdigest()
+
+
+### MAIN ###
+
+
+def main(argv):
+    for root, dirs, files in os.walk(argv[1]):
+        for filename in files:
+            full = os.path.normpath(os.path.join(root, filename))
+            hash = md5(full)
+            print hash, full
+
+if __name__ == '__main__':
+    main(sys.argv)

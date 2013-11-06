@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+
+"""
+List all files in a which are not found (by md5 hash) in index.txt.
+index.txt should be created by mk-dups-index.
+
+Usage: find-unique-by-index a index.txt
+
+"""
+
+import hashlib
+import os
+import sys
+import re
+
+
+def load_index(filename, hashindex):
+    f = open(filename, r)
+    for line in f:
+        match = re.match(r'^(.*?)\s+(.*?)$', line)
+        if match:
+            hashindex.setdefault(match.group(1), []).append(match.group(2))
+    f.close()
+
+
+def md5(filename):
+    """Compute and return the MD5 hash of the named file.
+
+    """
+    hash = hashlib.md5()
+    file = open(filename, "r")
+    eof = False
+    while not eof:
+        data = file.read(128)
+        if data:
+            hash.update(data)
+        else:
+            eof = True
+    file.close()
+    return hash.hexdigest()
+
+
+def build_hashmap(dir, exclude=None):
+    hashmap = {}
+    for root, dirs, files in os.walk(dir):
+        if os.path.normpath(root) == exclude:
+            print "(skipping %s)" % exclude
+            dirs[:] = []
+        else:
+            for filename in files:
+                full = os.path.normpath(os.path.join(root, filename))
+                try:
+                    hash = md5(full)
+                    hashmap.setdefault(hash, []).append(full)
+                except IOError as e:
+                    print str(e)
+    return hashmap
+
+
+### MAIN ###
+
+def main(argv):
+    dir_a = os.path.normpath(argv[1])
+    filename = os.path.normpath(argv[2])
+
+    print "reading index..."
+    b = {}
+    load_index(filename, b)
+
+    print "traversing %s..." % dir_a
+    a = build_hashmap(dir_a)
+
+    for hash in a:
+        if hash not in b:
+            for filename in a[hash]:
+                print filename
+
+
+if __name__ == '__main__':
+    main(sys.argv)
