@@ -15,7 +15,7 @@ import re
 
 
 def load_index(filename, hashindex):
-    f = open(filename, r)
+    f = open(filename, 'r')
     for line in f:
         match = re.match(r'^(.*?)\s+(.*?)$', line)
         if match:
