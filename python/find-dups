@@ -3,7 +3,11 @@
 """
 Find duplicate files.
 
-Usage: find-dups dir
+Usage: find-dups dir [canonical]
+
+If a duplicate is found, and one of the copies is has the prefix
+given by `canonical`, commands to remove all the other copies are output.
+
 """
 
 import hashlib
@@ -42,9 +46,26 @@ def main(argv):
     for hash in hashmap:
         filenames = sorted(hashmap[hash])
         if len(filenames) > 1:
-            print "%s:" % hash
+            print "# %s:" % hash
             for filename in filenames:
-                print "  %s" % filename
+                print "#   %s" % filename
+
+    if len(argv) == 3:
+        canonical = argv[2]
+        print
+        for hash in hashmap:
+            filenames = sorted(hashmap[hash])
+            if len(filenames) > 1:
+                canonicals = []
+                for filename in filenames:
+                    if filename.startswith(canonical):
+                        canonicals.append(filename)
+                if len(canonicals) == 1:
+                    print "# delete all except %s" % canonicals[0]
+                    for filename in filenames:
+                        if not filename.startswith(canonical):
+                            print "rm '%s'" % filename
+                    print
 
 if __name__ == '__main__':
     main(sys.argv)
