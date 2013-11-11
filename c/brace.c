@@ -50,9 +50,6 @@
 #include <err.h>
 #include <errno.h>
 #include <fcntl.h>
-#ifndef BSD
-  #include <libutil.h>
-#endif
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
