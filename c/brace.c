@@ -40,6 +40,7 @@
 /*
  * To build:
  *    cc brace.c -o brace -lutil
+ * on NetBSD, add -DBSD
  */
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -49,7 +50,9 @@
 #include <err.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <libutil.h>
+#ifndef BSD
+  #include <libutil.h>
+#endif
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,7 +62,11 @@
 #include <ctype.h>
 #include <sysexits.h>
 
-#include <pty.h>
+#ifdef BSD
+  #include <util.h>
+#else
+  #include <pty.h>
+#endif
 
 /* constants */
 #define BUFSIZE		4096
