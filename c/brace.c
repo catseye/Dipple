@@ -232,12 +232,22 @@ process_input(int fd, char *buf, size_t len)
 void
 process_output(int fd, char *buf, size_t len)
 {
-	size_t i = 0, start = 0;
+	size_t i = 0, j = 0, start = 0;
 
 	while (i < len) {
 		if (rand_out)
 			strrandcase(buf, len);
-		write(fd, buf, len);
+		/*
+		 * Add indentation.
+		 * Inefficient, but again, we'll live.
+		 */
+		for (j = 0; j < len; j++) {
+		    write(fd, buf + j, 1);
+		    if (buf[j] == '\n') {
+		        write(fd, "   ", 3);
+		    }
+		}
+		/* write(fd, buf, len); */
 		i = len;
 		break;
 	}
