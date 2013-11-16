@@ -3,9 +3,9 @@
 """
 Find duplicate files.
 
-Usage: find-dups dir [canonical]
+Usage: find-dups [--canonical=prefix] {dir}
 
-If a duplicate is found, and one of the copies is has the prefix
+If a duplicate is found, and exactly one of the copies has the prefix
 given by `canonical`, commands to remove all the other copies are output.
 
 """
@@ -13,6 +13,7 @@ given by `canonical`, commands to remove all the other copies are output.
 import hashlib
 import os
 import sys
+from optparse import OptionParser
 
 
 def md5(filename):
@@ -36,12 +37,21 @@ def md5(filename):
 
 
 def main(argv):
+    parser = OptionParser()
+    parser.add_option("--canonical",
+                      dest="canonical",
+                      default=None,
+                      help="output commands to delete all duplicates "
+                           "that do not have this prefix")
+    (options, args) = parser.parse_args()
+    
     hashmap = {}
-    for root, dirs, files in os.walk(argv[1]):
-        for filename in files:
-            full = os.path.normpath(os.path.join(root, filename))
-            hash = md5(full)
-            hashmap.setdefault(hash, []).append(full)
+    for directory in args:
+        for root, dirs, files in os.walk(directory):
+            for filename in files:
+                full = os.path.normpath(os.path.join(root, filename))
+                hash = md5(full)
+                hashmap.setdefault(hash, []).append(full)
 
     for hash in hashmap:
         filenames = sorted(hashmap[hash])
@@ -50,21 +60,20 @@ def main(argv):
             for filename in filenames:
                 print "#   %s" % filename
 
-    if len(argv) == 3:
-        canonical = argv[2]
+    if options.canonical is not None:
         print
         for hash in hashmap:
             filenames = sorted(hashmap[hash])
             if len(filenames) > 1:
                 canonicals = []
                 for filename in filenames:
-                    if filename.startswith(canonical):
+                    if filename.startswith(options.canonical):
                         canonicals.append(filename)
                 if len(canonicals) == 1:
                     print "# delete all except %s" % canonicals[0]
                     for filename in filenames:
-                        if not filename.startswith(canonical):
-                            print "rm '%s'" % filename
+                        if not filename.startswith(options.canonical):
+                            print 'rm "%s"' % filename
                     print
 
 if __name__ == '__main__':
