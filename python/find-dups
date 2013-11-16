@@ -1,12 +1,25 @@
 #!/usr/bin/env python
 
-"""
+r"""
 Find duplicate files.
 
-Usage: find-dups [--canonical=prefix] {dir}
+Usage: find-dups [--canonical=<prefix>] [--format=<fmt>] {dir}
 
-If a duplicate is found, and exactly one of the copies has the prefix
-given by `canonical`, commands to remove all the other copies are output.
+Any number of directories may be given.
+
+If --canonical is not given, list all duplicate files found in those
+directories, indexed by their md5 hashes.
+
+If --canonical is given, it is a prefix; list all duplicate files
+that do not have that prefix.
+
+If --format is given, apply that format string to output filenames.
+For example,
+
+    find-dups foo --canonical=foo/bar --format="rm \"%s\""
+
+...will produce a script to remove the duplicate files found somewhere
+in foo other than in foo/bar.
 
 """
 
@@ -41,26 +54,31 @@ def main(argv):
     parser.add_option("--canonical",
                       dest="canonical",
                       default=None,
-                      help="output commands to delete all duplicates "
+                      help="list all duplicate files found "
                            "that do not have this prefix")
+    parser.add_option("--format",
+                      dest="format",
+                      default="%s",
+                      help="format string for output filenames")
     (options, args) = parser.parse_args()
-    
+
     hashmap = {}
     for directory in args:
+        print "traversing %s..." % directory
         for root, dirs, files in os.walk(directory):
             for filename in files:
                 full = os.path.normpath(os.path.join(root, filename))
                 hash = md5(full)
                 hashmap.setdefault(hash, []).append(full)
 
-    for hash in hashmap:
-        filenames = sorted(hashmap[hash])
-        if len(filenames) > 1:
-            print "# %s:" % hash
-            for filename in filenames:
-                print "#   %s" % filename
-
-    if options.canonical is not None:
+    if options.canonical is None:
+        for hash in hashmap:
+            filenames = sorted(hashmap[hash])
+            if len(filenames) > 1:
+                print "# %s:" % hash
+                for filename in filenames:
+                    print "#   %s" % filename
+    else:
         print
         for hash in hashmap:
             filenames = sorted(hashmap[hash])
@@ -70,11 +88,9 @@ def main(argv):
                     if filename.startswith(options.canonical):
                         canonicals.append(filename)
                 if len(canonicals) == 1:
-                    print "# delete all except %s" % canonicals[0]
                     for filename in filenames:
                         if not filename.startswith(options.canonical):
-                            print 'rm "%s"' % filename
-                    print
+                            print options.format % filename
 
 if __name__ == '__main__':
     main(sys.argv)
