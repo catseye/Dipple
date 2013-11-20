@@ -3,11 +3,13 @@
 """
 Find unique files.
 
-Usage: find-unique a b
+Usage: find-unique src-dir {dest-dirs}
 
-List all files in a which are not to be found anywhere (under any name) in b.
+List all files in src-dir which are not to be found anywhere (under any name)
+in any of the dest-dirs
 
-a may be somewhere inside b.  a will not be traversed during b traveral.
+src-dir may be somewhere inside one of the dest-dirs.  src-dir will not be
+traversed during dest-dir traveral.  (really?  doesn't always seem to work)
 
 """
 
@@ -33,8 +35,7 @@ def md5(filename):
     return hash.hexdigest()
 
 
-def build_hashmap(dir, exclude=None):
-    hashmap = {}
+def build_hashmap(dir, hashmap, exclude=None):
     for root, dirs, files in os.walk(dir):
         if os.path.normpath(root) == exclude:
             print "(skipping %s)" % exclude
@@ -47,18 +48,22 @@ def build_hashmap(dir, exclude=None):
                     hashmap.setdefault(hash, []).append(full)
                 except IOError as e:
                     print str(e)
-    return hashmap
 
 
 ### MAIN ###
 
 def main(argv):
     dir_a = os.path.normpath(argv[1])
-    dir_b = os.path.normpath(argv[2])
     print "traversing %s..." % dir_a
-    a = build_hashmap(dir_a)
-    print "traversing %s..." % dir_b
-    b = build_hashmap(dir_b, exclude=dir_a)
+    a = {}
+    build_hashmap(dir_a, a)
+
+    b = {}
+    for arg in argv[2:]:
+        dest_dir = os.path.normpath(arg)
+        print "traversing %s..." % dest_dir
+        build_hashmap(dest_dir, b, exclude=dir_a)
+
     for hash in a:
         if hash not in b:
             for filename in a[hash]:
