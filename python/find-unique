@@ -3,19 +3,32 @@
 """
 Find unique files.
 
-Usage: find-unique src-dir {dest-dirs}
+Usage: find-unique src-dir {dest-dir | dest-index}
 
 List all files in src-dir which are not to be found anywhere (under any name)
-in any of the dest-dirs
+in any of the dest-dirs or dest-indexes.
 
 src-dir may be somewhere inside one of the dest-dirs.  src-dir will not be
 traversed during dest-dir traveral.  (really?  doesn't always seem to work)
+
+index files are identified by being files instead of dirs.  index files
+should be created by mk-dups-index.
 
 """
 
 import hashlib
 import os
+import re
 import sys
+
+
+def load_index(filename, hashindex):
+    f = open(filename, 'r')
+    for line in f:
+        match = re.match(r'^(.*?)\s+(.*?)$', line)
+        if match:
+            hashindex.setdefault(match.group(1), []).append(match.group(2))
+    f.close()
 
 
 def md5(filename):
@@ -60,9 +73,13 @@ def main(argv):
 
     b = {}
     for arg in argv[2:]:
-        dest_dir = os.path.normpath(arg)
-        print "traversing %s..." % dest_dir
-        build_hashmap(dest_dir, b, exclude=dir_a)
+        dest = os.path.normpath(arg)
+        if os.path.isdir(dest):
+            print "traversing %s..." % dest
+            build_hashmap(dest, b, exclude=dir_a)
+        else:
+            print "reading index %s..." % dest
+            load_index(dest, b)
 
     for hash in a:
         if hash not in b:
