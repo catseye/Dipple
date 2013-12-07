@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>HTML5 Big Canvas Experiment</title>
+  <style>
+#canvas {
+  background: #000040;
+  border: 1px solid blue;
+  /* CSS dimensions, NOT canvas dimensions */
+  width: 220px;
+  height: 144px;
+}
+  </style>
+</head>
+<body>
+
+<h1>HTML5 Big Canvas Experiment</h1>
+
+<p>An experiment of making a canvas with large dimensions internally
+(and when exported to PNG) but small dimensions on the page (via CSS).</p>
+
+<p>Note that both Render and Export can take some time, because
+the canvas is so large, and may cause your browser to appear to hang
+(it's probably fine, just very busy.)</p>
+
+<canvas id="canvas" width="2200" height="1435">
+Your browser doesn't support displaying an HTML5 canvas.
+</canvas><br>
+
+<button id="render" onclick="render();">Render</button><br>
+<button id="export" onclick="exportToPNG();">Export to PNG</button><br>
+
+</body>
+<script>
+function exportToPNG() {
+    var canvas = document.getElementById('canvas');
+    var dataURL = canvas.toDataURL("image/png");
+    window.location = dataURL;
+};
+
+function render() {
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext("2d");
+    for (var y = 0; y < canvas.height;) {
+        for (var x = 0; x < canvas.width;) {
+            var r = Math.random() * 30 + 10;
+            ctx.beginPath();
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 3;
+            ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+            ctx.stroke();            
+            x += r;
+        }
+        y += 40;
+    }
+};
+</script>
