@@ -23,7 +23,7 @@ def md5(filename):
     file = open(filename, "r")
     eof = False
     while not eof:
-        data = file.read(128)
+        data = file.read(1024)
         if data:
             hash.update(data)
         else:

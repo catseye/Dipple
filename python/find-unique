@@ -20,6 +20,7 @@ import hashlib
 import os
 import re
 import sys
+from optparse import OptionParser
 
 
 def load_index(filename, hashindex):
@@ -39,7 +40,7 @@ def md5(filename):
     file = open(filename, "r")
     eof = False
     while not eof:
-        data = file.read(128)
+        data = file.read(1024)
         if data:
             hash.update(data)
         else:
@@ -66,13 +67,22 @@ def build_hashmap(dir, hashmap, exclude=None):
 ### MAIN ###
 
 def main(argv):
-    dir_a = os.path.normpath(argv[1])
+    parser = OptionParser()
+    parser.add_option("--move-to",
+                      dest="move_to",
+                      default=None,
+                      help="move unique files to this directory "
+                           "(DOES NOT CHECK THAT THE FILE BASENAMES "
+                           "ARE UNIQUE)")
+
+    (options, args) = parser.parse_args()
+    dir_a = os.path.normpath(args[0])
     print "traversing %s..." % dir_a
     a = {}
     build_hashmap(dir_a, a)
 
     b = {}
-    for arg in argv[2:]:
+    for arg in args[1:]:
         dest = os.path.normpath(arg)
         if os.path.isdir(dest):
             print "traversing %s..." % dest
@@ -85,6 +95,12 @@ def main(argv):
         if hash not in b:
             for filename in a[hash]:
                 print filename
+                if options.move_to is not None:
+                    basename = os.path.basename(filename)
+                    destname = os.path.join(options.move_to, basename)
+                    print "renaming to %s..." % destname
+                    os.rename(filename, destname)
+
 
 if __name__ == '__main__':
     main(sys.argv)
