@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Infinite Scroll</title>
+  <style>
+#scroller {
+    width: 420px;
+    height: 280px;
+    border: 1px solid blue;
+    overflow: auto;
+}
+  </style>
+</head>
+<body>
+
+<h1>Infinite Scroll (inside a <code>div</code>)</h1>
+
+<div id="scroller">
+  <div id="inner">
+  </div>
+</div>
+
+<p id="info"></p>
+
+</body>
+<script>
+  var addMoreContent = function(elem) {
+      var content = [
+          'Lever',
+          'Pulley',
+          'Wheel and Axle',
+          'Inclined Plane',
+          'Screw',
+          'Wedge'
+      ][Math.floor(Math.random() * 6)];
+      elem.innerHTML += '<p>' + content + '!</p>';
+  };
+
+  var scroller = document.getElementById('scroller');
+  var inner = document.getElementById('inner');
+  var info = document.getElementById('info');
+  for (var i = 0; i < 20; i++) {
+      addMoreContent(inner);
+  }
+  scroller.onscroll = function(e) {
+      var scrollBottom = scroller.scrollTop + scroller.offsetHeight;
+      info.innerHTML = 'scroll (bottom): ' + scrollBottom + ', height: ' + inner.offsetHeight;
+      if (scrollBottom >= inner.offsetHeight) {
+          addMoreContent(inner);
+      }
+  };
+</script>
