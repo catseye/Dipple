@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+# encoding: UTF-8
+
+"""stars2links {options} username
+
+Convert a user's list of starred repositories on Github to a Markdown
+document containing links to all the repositories, with their descriptions
+and homepages.
+
+Useful if you've been a little too star-happy lately.  Starring is a great
+quick way to bookmark Github projects, but it can get out of hand; sometimes
+you just want to remember that a project exists.
+
+Requires `requests`.
+
+Example:
+
+  pip install --user requests
+  stars2links --login=yourgithublogin catseye --output=stars.md
+  pandoc --from=markdown --to=html5 --standalone <stars.md >stars.html
+  firefox stars.html
+
+"""
+
+import codecs
+import getpass
+import optparse
+import re
+import sys
+
+import requests
+
+
+def each_api_thing(username, url_template, auth=None,
+                   api_prefix='https://api.github.com'):
+    url = (api_prefix + url_template) % username
+
+    done = False
+    while not done:
+        response = requests.get(url, auth=auth)
+        data = response.json()
+        if 'message' in data:
+            raise ValueError(data)
+        for item in data:
+            yield item
+        link = response.headers.get('Link', None)
+        if link is None:
+            done = True
+        else:
+            match = re.match(r'\<(.*?)\>\s*\;\s*rel\s*=\s*\"next\"', link)
+            if not match:
+                done = True
+            else:
+                url = match.group(1)
+
+
+def each_user_star(username, auth=None):
+    for item in each_api_thing(username, '/users/%s/starred', auth=auth):
+        yield item
+
+
+def main(args):
+    parser = optparse.OptionParser(__doc__)
+    parser.add_option("--login", dest="login",
+                      default=None, metavar='USERNAME',
+                      help="username to login with when using the "
+                           "Github API")
+    parser.add_option("--output", dest="output",
+                      default=None, metavar='FILENAME',
+                      help="redirect output to a file (UTF-8 sound)")
+    (options, args) = parser.parse_args(args)
+    try:
+        username = args[0]
+    except IndexError:
+        print "Usage: stars2links {options} username"
+        print "Run 'stars2links --help' for full usage."
+        sys.exit(1)
+
+    auth = None
+    if options.login is not None:
+        password = getpass.getpass('Password: ')
+        auth = (options.login, password)
+
+    stars = {}
+    for star in each_user_star(username, auth=auth):
+        stars[star['full_name']] = star
+
+    output_file = sys.stdout
+    if options.output:
+        output_file = codecs.open(options.output, 'w', 'utf-8')
+
+    for star_key in sorted(stars):
+        star = stars[star_key]
+        output_file.write(u"""
+### [%s](%s)
+
+%s""" % (star['full_name'], star['html_url'], star['description']))
+        if star['homepage']:
+            homepage = star['homepage']
+            if not homepage.startswith(('http://', 'https://')):
+                homepage = 'http://' + homepage
+            output_file.write(u" — [%s](%s)" % (
+                star['homepage'], star['homepage'])
+            )
+        output_file.write(u"\n")
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
