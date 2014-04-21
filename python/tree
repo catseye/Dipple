@@ -5,25 +5,49 @@ import re
 import sys
 
 
-def print_tree(dirname, indent):
+def print_tree(dirname, indent, summary=False):
     filenames = os.listdir(dirname)
     filenames.sort()
+    if summary:
+        dirnames = []
+        subfilenames = []
+        for filename in filenames:
+            if filename.startswith('.'):
+                continue
+            fullname = os.path.join(dirname, filename)
+            if os.path.isdir(fullname):
+                dirnames.append(filename)
+            else:
+                subfilenames.append(filename)
+        filenames = dirnames
+        if subfilenames:
+            file_string = ' '.join(subfilenames)
+            if len(indent + file_string) > 75:
+                file_string = file_string[:75 - len(indent)] + '...'
+            filenames.append(file_string)
     for filename in filenames:
         if filename.startswith('.'):
             continue
         fullname = os.path.join(dirname, filename)
         if os.path.isdir(fullname):
             print indent + filename
-            print_tree(fullname, indent + '  ')
+            print_tree(fullname, indent + '  ', summary=summary)
         else:
             print indent + filename
 
 
 def main(argv):
-    if len(argv) < 2:
-        argv.append('.')
-    print_tree(argv[1], '')
+    summary = True
+    if not argv:
+        argv = ['.']
+    while argv[0].startswith('--'):
+        opt = argv.pop(0)
+        if opt == '--all':
+            summary = False
+        else:
+            raise ValueError("Unknown command-line option '%s'" % opt)
+    print_tree(argv[0], '', summary=summary)
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main(sys.argv[1:])
