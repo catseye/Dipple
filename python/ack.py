@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+
 def ack(m, n):
     if m == 0:
         return n + 1
@@ -8,8 +10,16 @@ def ack(m, n):
     else:
         return ack(m-1, ack(m, n-1))
 
+sys.setrecursionlimit(12000)
+
 for m in range(0, 4):
-  for n in range(0, 4):
+  for n in range(0, 10):
     print "ack(%s,%s)=%s" % (m, n, ack(m, n))
 
-print ack(4, 1)
+m = 4
+n = 0
+print "ack(%s,%s)=%s" % (m, n, ack(m, n))
+
+# m = 4
+# n = 1
+# print "ack(%s,%s)=%s" % (m, n, ack(m, n))
