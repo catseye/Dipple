@@ -23,11 +23,13 @@ else:
             done = True
         accum += s
     (pid, exitcode) = os.waitpid(pid, 0)
+    core_dumped = (exitcode & 128) == 128
     exitcode = exitcode >> 8
+    if core_dumped and exitcode == 0:
+        # force the exitcode to non-zero if we dumped core.
+        exitcode = 1
     if exitcode == 0:
         sys.stdout.write(s)
     else:
         sys.stderr.write(s)
     sys.exit(exitcode)
-
-# pty.spawn(sys.argv[1:], master_read)
