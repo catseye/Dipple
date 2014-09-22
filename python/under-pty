@@ -2,6 +2,32 @@
 
 import pty
 import sys
+import os
 
-pty.spawn(sys.argv[1:])
 
+command = sys.argv[1]
+args = sys.argv[2:]
+
+(pid, fd) = pty.fork()
+if pid == 0:
+    # I'm the child
+    os.execvp(command, [command] + args)
+else:
+    # I'm the parent
+    accum = ''
+    SIZE = 1024
+    done = False
+    while not done:
+        s = os.read(fd, SIZE)
+        if len(s) < SIZE:
+            done = True
+        accum += s
+    (pid, exitcode) = os.waitpid(pid, 0)
+    exitcode = exitcode >> 8
+    if exitcode == 0:
+        sys.stdout.write(s)
+    else:
+        sys.stderr.write(s)
+    sys.exit(exitcode)
+
+# pty.spawn(sys.argv[1:], master_read)
