@@ -2,10 +2,11 @@ module TextThing2 where
 
 import System.Environment
 
+data Type = Word | Line | Para
+    deriving (Show, Ord, Eq)
+
 data Text = Char String
-          | Word Text
-          | Line Text
-          | Para Text
+          | Grp Type Text
           | Seq [Text]
     deriving (Show, Ord, Eq)
 
@@ -16,11 +17,43 @@ whitespace (Char " ")  = True
 whitespace _           = False
 
 
+notEmptyWord (Grp Word (Seq [])) = False
+notEmptyWord _ = True
+
+notChar c (Char d) = not (c == d)
+notChar c _ = True
+
+
+-- could be implemented as the Show...
+
+render (Char s) = s
+render (Grp Line t) = (render t) ++ "\n"
+render (Grp Para t) = (render t) ++ "\n"
+render (Grp Word t) = render t
+render (Seq []) = ""
+render (Seq (t:ts)) = (render t) ++ render (Seq ts)
+
+
 main = do
     [fileName] <- getArgs
     run fileName
 
 run fileName = do
+    a <- readToChars fileName
+
+    let b = groupCharsToLines a
+    let c = groupLinesToWords b
+    let d = groupLinesToParas c
+    putStr (render d)
+
+    --let d' = filt notEmptyWord d
+    --putStr (render d')
+
+    let d' = filt (notChar "a") d
+    putStr (render d')
+
+
+demo fileName = do
     a <- readToChars fileName
 
     let b = groupCharsToLines a
@@ -60,7 +93,7 @@ groupCharsToLines (Seq many) =
             let
                 (line, rest) = scanLine cs []
             in
-                ((Line $ Seq $ line):(g rest))
+                ((Grp Line $ Seq $ line):(g rest))
 
 scanLine [] acc = (reverse acc, [])
 scanLine (Char "\n":cs) acc = (reverse acc, cs)
@@ -76,7 +109,7 @@ groupCharsToWords (Seq many) =
                 (word, rest) = scanWord cs []
                 (spc, rest') = scanSpaces rest []
             in
-                ((Word $ Seq $ word):(Word $ Seq $ spc):(g rest'))
+                ((Grp Word $ Seq $ word):(Grp Word $ Seq $ spc):(g rest'))
 
 scanWord [] acc = (reverse acc, [])
 scanWord (c:cs) acc =
@@ -88,7 +121,7 @@ scanSpaces (c:cs) acc =
 
 
 groupLinesToWords (Seq many) =
-    Seq $ map (\(Line x) -> Line $ groupCharsToWords x) many
+    Seq $ map (\(Grp Line x) -> Grp Line $ groupCharsToWords x) many
 
 
 groupLinesToParas (Seq many) =
@@ -100,14 +133,14 @@ groupLinesToParas (Seq many) =
                 (lines, rest) = scanPara cs []
                 (spc, rest') = scanBlankLines rest []
             in
-                ((Para $ Seq $ lines):(g rest'))
+                ((Grp Para $ Seq $ lines):(g rest'))
 
 scanPara [] acc = (reverse acc, [])
-scanPara (Line (Seq []):ls) acc = (reverse acc, ls)
+scanPara (Grp Line (Seq []):ls) acc = (reverse acc, ls)
 scanPara (l:ls) acc = scanPara ls (l:acc)
 
 scanBlankLines [] acc = (reverse acc, [])
-scanBlankLines (l@(Line (Seq [])):ls) acc = scanBlankLines ls (l:acc)
+scanBlankLines (l@(Grp Line (Seq [])):ls) acc = scanBlankLines ls (l:acc)
 scanBlankLines (l:ls) acc = (reverse acc, (l:ls))
 
 
@@ -115,15 +148,24 @@ scanBlankLines (l:ls) acc = (reverse acc, (l:ls))
 
 replace a b (Seq many) =
     Seq $ map (replace a b) many
-replace a b t@(Word txt)
+replace a b t@(Grp typ txt)
     | t == a    = b
-    | otherwise = Word $ replace a b txt
-replace a b t@(Line txt)
-    | t == a    = b
-    | otherwise = Line $ replace a b txt
-replace a b t@(Para txt)
-    | t == a    = b
-    | otherwise = Para $ replace a b txt
+    | otherwise = Grp typ $ replace a b txt
 replace a b t@(Char c)
     | t == a    = b
     | otherwise = t
+
+
+concatSeq t (Seq ts) =
+   Seq (t:ts)
+
+
+filt pred (Seq []) = (Seq [])
+filt pred (Seq (t:ts)) =
+    case pred t of
+        True  -> concatSeq (filt pred t) (filt pred (Seq ts))
+        False -> filt pred (Seq ts)
+filt pred (Grp typ txt) =
+    Grp typ $ filt pred txt
+filt pred c@(Char _) =
+    c
