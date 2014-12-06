@@ -4,7 +4,7 @@
 
 ; (chars ...) -- a list of Scheme character objects representing a text
 ; (words ...) -- a list of "chars"es, where each "chars" is a word OR whitespace chunk
-; (lines ...) -- a list of "chars"es, where each "chars" is a line
+; (lines ...) -- a list of FOOs, where each FOO is a "chars" or a "words"
 
 ;
 ; Utilties -- ignore these for now -- skip down for the good stuff
@@ -25,6 +25,13 @@
     (if (null? chars) chars)
       (if (pred (car chars) (cdr chars))
         chars)))
+
+;
+; Utility: Convert a Scheme string to a "chars".
+;
+(define string->chars
+  (lambda (s)
+    (cons 'chars (string->list s))))
 
 ;
 ; Open and read a text file as a "chars".
@@ -59,14 +66,31 @@
 
 (define extract-line
   (lambda (chars acc)
-    (if (null? chars) (list (cons 'char (reverse acc)) chars)
+    (if (null? chars) (list (cons 'chars (reverse acc)) chars)
       (let* ((char (car chars))
              (rest (cdr chars)))
         (if (newline? char)
-          (list (cons 'char (reverse acc)) rest)
+          (list (cons 'chars (reverse acc)) rest)
           (extract-line rest (cons char acc)))))))
 
-; --------- not converted out yet -------- ;
+;
+; Regroup a "chars" into a "words" of "chars".
+;
+(define extract-words
+  (lambda (chars)
+    (if (equal? (car chars) 'chars)
+      (extract-words-rec (cdr chars) '()))))
+
+(define extract-words-rec
+  (lambda (chars acc)
+    (if (null? chars) (cons 'words (reverse acc))
+      (let* ((result  (extract-word chars '()))
+             (word    (list->string (car result)))
+             (rest    (cadr result))
+             (result2 (extract-whitespace rest '()))
+             (word2   (list->string (car result2)))
+             (rest2   (cadr result2)))
+        (extract-words-rec rest2 (cons word2 (cons word acc)))))))
 
 (define extract-whitespace
   (lambda (chars acc)
@@ -86,13 +110,10 @@
           (list (reverse acc) chars)
           (extract-word rest (cons char acc)))))))
 
-(define extract-words
-  (lambda (chars acc)
-    (if (null? chars) (cons 'words (reverse acc))
-      (let* ((result  (extract-word chars '()))
-             (word    (list->string (car result)))
-             (rest    (cadr result))
-             (result2 (extract-whitespace rest '()))
-             (word2   (list->string (car result2)))
-             (rest2   (cadr result2)))
-        (extract-words rest2 (cons word2 (cons word acc)))))))
+;
+; Regroup a "lines" of "chars" into a "lines" of "words" of "chars".
+;
+(define lines-chars->words
+  (lambda (lines)
+    (if (equal? (car lines) 'lines)
+      (cons 'lines (map extract-words (cdr lines))))))
