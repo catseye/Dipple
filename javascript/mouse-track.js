@@ -66,16 +66,25 @@ function MouseTracker(elem) {
     };
 
     self.dump = function() {
-        var i;
+        var e = document.getElementById('dump');
         var base = events[0].timeStamp;
         var offs = self.offset();
-        for (i = 0; i < events.length; i++) {
+
+        var t = '[\n';
+        for (var i = 0; i < events.length; i++) {
             var x = events[i].pageX - offs[0];
             var y = events[i].pageY - offs[1];
             var sec = (events[i].timeStamp - base) / 1000.0;
-            console.log("" + x + ", " + y + " @ " + sec);
+            //for (var i = 0; i < path.length; i++) {
+            t += [x, y, sec].toString();
+            if (i < events.length - 1) { t += ','; }
+            t += '\n';
         }
-        events = [];
+        t += ']';
+        e.value = t;
+    };
+
+    self.load = function() {
     };
 
     return self;
