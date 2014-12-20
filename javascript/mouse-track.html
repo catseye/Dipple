@@ -17,17 +17,20 @@ Your browser doesn't support displaying an HTML5 canvas.
 </canvas>
 </div>
 
+<p id="info"></p>
+
 <div>
-<button id="dump">Dump</button>
+<button onclick="mt.start();">Record</button>
+<button onclick="mt.stop();">Stop</button>
+<button onclick="mt.replay();">Replay</button>
+<button onclick="mt.clear();">Clear</button>
 </div>
 
 <p>As the mouse is moved across the canvas, its position
-at each point in time is recorded.  Clicking the "Dump" button displays
-these events in the Javascript console.</p>
+at each point in time is recorded.  Clicking the "Replay" button replays
+these events, showing a red square where the pointer was.</p>
 
 </body>
 <script>
   var mt = MouseTracker(document.getElementById('canvas'));
-  mt.start();
-  document.getElementById('dump').onclick = function (e) { mt.dump(); }
 </script>

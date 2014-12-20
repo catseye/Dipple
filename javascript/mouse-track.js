@@ -6,6 +6,16 @@ function MouseTracker(elem) {
         elem.onmousemove = function(event) {
             events.push(event);
         };
+        elem.style.background = "blue";
+    };
+
+    self.stop = function() {
+        elem.onmousemove = null;
+        elem.style.background = "white";
+    };
+
+    self.clear = function() {
+        events = [];
     };
 
     self.offset = function() {
@@ -20,6 +30,39 @@ function MouseTracker(elem) {
         }
 
         return [left, top];
+    };
+
+    self.replay = function() {
+        var i = 0;
+        var t = 0.0;
+        var base = events[0].timeStamp;
+        var offs = self.offset();
+        var interval;
+        interval = setInterval(function() {
+            t += 0.01;
+            s = "z";
+            var x = undefined;
+            var y = undefined;
+            var sec;
+            while (i < events.length && ((events[i].timeStamp - base) / 1000.0) < t) {
+                x = events[i].pageX - offs[0];
+                y = events[i].pageY - offs[1];
+                sec = (events[i].timeStamp - base) / 1000.0;
+                s += "  (" + i + ") " + x + ", " + y + " @ " + sec;
+                i++;
+            }
+            if (x !== undefined) {
+                var ctx = elem.getContext("2d");
+                ctx.clearRect(0, 0, elem.width, elem.height);
+                ctx.fillStyle = "red";
+                ctx.fillRect(x - 4, y - 4, 8, 8);
+            }
+            //document.getElementById('info').innerHTML = s;
+            if (i >= events.length) {
+                clearInterval(interval);
+                return;
+            }
+        }, 10);
     };
 
     self.dump = function() {
