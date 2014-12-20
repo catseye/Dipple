@@ -1,10 +1,18 @@
 function MouseTracker(elem) {
     var self = {};
     var events = [];
+    var base;
 
     self.start = function() {
+        var offs = self.offset();
         elem.onmousemove = function(event) {
-            events.push(event);
+            if (events.length == 0) {
+                events.push([event.pageX - offs[0], event.pageY - offs[1], 0.0]);
+                base = event.timeStamp;
+            } else {
+                events.push([event.pageX - offs[0], event.pageY - offs[1],
+                             (event.timeStamp - base) / 1000.0]);
+            }
         };
         elem.style.background = "blue";
     };
@@ -44,10 +52,10 @@ function MouseTracker(elem) {
             var x = undefined;
             var y = undefined;
             var sec;
-            while (i < events.length && ((events[i].timeStamp - base) / 1000.0) < t) {
-                x = events[i].pageX - offs[0];
-                y = events[i].pageY - offs[1];
-                sec = (events[i].timeStamp - base) / 1000.0;
+            while (i < events.length && events[i][2] < t) {
+                x = events[i][0];
+                y = events[i][1];
+                sec = events[i][2];
                 s += "  (" + i + ") " + x + ", " + y + " @ " + sec;
                 i++;
             }
@@ -72,11 +80,7 @@ function MouseTracker(elem) {
 
         var t = '[\n';
         for (var i = 0; i < events.length; i++) {
-            var x = events[i].pageX - offs[0];
-            var y = events[i].pageY - offs[1];
-            var sec = (events[i].timeStamp - base) / 1000.0;
-            //for (var i = 0; i < path.length; i++) {
-            t += [x, y, sec].toString();
+            t += '[' + events[i].toString() + ']';
             if (i < events.length - 1) { t += ','; }
             t += '\n';
         }
@@ -85,6 +89,7 @@ function MouseTracker(elem) {
     };
 
     self.load = function() {
+        events = eval(document.getElementById('dump').value);
     };
 
     return self;
