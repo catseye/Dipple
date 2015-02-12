@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Dynamically-generated SVG</title>
+</head>
+<body>
+
+<h1>Dynamically-generated SVG</h1>
+
+<div id="container"></div>
+
+</body>
+<script>
+
+var elem = document.getElementById('container');
+
+var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+var rect = document.createElementNS(svg.namespaceURI, "rect");
+rect.setAttribute("id", "rect");
+rect.setAttribute("x", 100);
+rect.setAttribute("y", 100);
+rect.setAttribute("width", 500);
+rect.setAttribute("height", 200);
+rect.setAttribute("fill", '#603020');
+svg.appendChild(rect);
+rect.onclick = function(e) {
+    rect.setAttribute("fill", "yellow");
+};
+
+var circ = document.createElementNS(svg.namespaceURI, "circle");
+circ.setAttribute("id", "circ");
+circ.setAttribute("cx", 100);
+circ.setAttribute("cy", 100);
+circ.setAttribute("r", 50);
+circ.setAttribute("fill", "black");
+circ.setAttribute("stroke", "white");
+svg.appendChild(circ);
+circ.onclick = function(e) {
+    circ.setAttribute("r", circ.getAttribute("r") - 5);
+};
+
+elem.appendChild(svg);
+svg.style.height = "300px"; // otherwise, shapes get chopped off; 100px seems to be the default
+//svg.style.overflow = "scroll";  // no workie
+
+</script>
