@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Magnified Canvas</title>
+</head>
+<body>
+<h1>Magnified Canvas</h1>
+
+<p>For to see exactly when you should be placing things at 0.5 canvas units.</p>
+
+<canvas id="canvas" width="200" height="200">
+Your browser doesn't support displaying an HTML5 canvas.
+</canvas>
+
+</body>
+<script>
+var draw = function() {
+    var canvas = document.getElementById('canvas');
+    canvas.width = 20;
+    canvas.style.width = (canvas.width * 10) + 'px';
+    canvas.height = 20;
+    canvas.style.height = (canvas.height * 10) + 'px';
+    var ctx = canvas.getContext('2d');
+
+    var x = 0;
+    var y = 0;
+    var w = 20;
+    var h = 20;
+
+    ctx.beginPath();
+    ctx.fillStyle = 'red';
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + w/2, y + h/2);
+    ctx.lineTo(x + w, y);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.fillStyle = 'green';
+    ctx.moveTo(x + w, y);
+    ctx.lineTo(x + w/2, y + h/2);
+    ctx.lineTo(x + w, y + h);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.fillStyle = 'blue';
+    ctx.moveTo(x + w, y + h);
+    ctx.lineTo(x + w/2, y + h/2);
+    ctx.lineTo(x, y + h);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.fillStyle = 'yellow';
+    ctx.moveTo(x, y + h);
+    ctx.lineTo(x + w/2, y + h/2);
+    ctx.lineTo(x, y);
+    ctx.closePath();
+    ctx.fill();
+};
+
+window.onload = draw();
+window.resize = draw();
+</script>
