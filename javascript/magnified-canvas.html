@@ -2,62 +2,85 @@
 <head>
   <meta charset="utf-8">
   <title>Magnified Canvas</title>
+  <style>
+canvas { border: 1px solid black; }
+  </style>
 </head>
 <body>
 <h1>Magnified Canvas</h1>
 
 <p>For to see exactly when you should be placing things at 0.5 canvas units.</p>
 
-<canvas id="canvas" width="200" height="200">
+<canvas id="canvas1">
+Your browser doesn't support displaying an HTML5 canvas.
+</canvas>
+
+<canvas id="canvas2">
 Your browser doesn't support displaying an HTML5 canvas.
 </canvas>
 
 </body>
 <script>
 var draw = function() {
-    var canvas = document.getElementById('canvas');
-    canvas.width = 20;
-    canvas.style.width = (canvas.width * 10) + 'px';
-    canvas.height = 20;
-    canvas.style.height = (canvas.height * 10) + 'px';
-    var ctx = canvas.getContext('2d');
-
     var x = 0;
     var y = 0;
-    var w = 20;
-    var h = 20;
+    var w = 30;
+    var h = 30;
+    var zoom1 = 1;
+    var zoom2 = 10;
 
-    ctx.beginPath();
-    ctx.fillStyle = 'red';
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + w/2, y + h/2);
-    ctx.lineTo(x + w, y);
-    ctx.closePath();
-    ctx.fill();
-    
-    ctx.beginPath();
-    ctx.fillStyle = 'green';
-    ctx.moveTo(x + w, y);
-    ctx.lineTo(x + w/2, y + h/2);
-    ctx.lineTo(x + w, y + h);
-    ctx.closePath();
-    ctx.fill();
-    
-    ctx.beginPath();
-    ctx.fillStyle = 'blue';
-    ctx.moveTo(x + w, y + h);
-    ctx.lineTo(x + w/2, y + h/2);
-    ctx.lineTo(x, y + h);
-    ctx.closePath();
-    ctx.fill();
-    
-    ctx.beginPath();
-    ctx.fillStyle = 'yellow';
-    ctx.moveTo(x, y + h);
-    ctx.lineTo(x + w/2, y + h/2);
-    ctx.lineTo(x, y);
-    ctx.closePath();
-    ctx.fill();
+    var canvas1 = document.getElementById('canvas1');
+    canvas1.width = w;
+    canvas1.style.width = (canvas1.width * zoom1) + 'px';
+    canvas1.height = h;
+    canvas1.style.height = (canvas1.height * zoom1) + 'px';
+    var ctx1 = canvas1.getContext('2d');
+
+    var canvas2 = document.getElementById('canvas2');
+    canvas2.width = w;
+    canvas2.style.width = (canvas2.width * zoom2) + 'px';
+    canvas2.height = h;
+    canvas2.style.height = (canvas2.height * zoom2) + 'px';
+    var ctx2 = canvas2.getContext('2d');
+
+    var drawCtx = function(ctx) {
+
+        ctx.beginPath();
+        ctx.fillStyle = 'red';
+        ctx.moveTo(x - 0.5, y);
+        ctx.lineTo(x + w/2, y + h/2 + 0.5);
+        ctx.lineTo(x + w, y);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.fillStyle = 'green';
+        ctx.moveTo(x + w, y - 0.5);
+        ctx.lineTo(x + w/2 - 0.5, y + h/2);
+        ctx.lineTo(x + w, y + h);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.fillStyle = 'blue';
+        ctx.moveTo(x + w + 0.5, y + h);
+        ctx.lineTo(x + w/2, y + h/2 - 0.5);
+        ctx.lineTo(x, y + h);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.fillStyle = 'yellow';
+        ctx.moveTo(x, y + h + 0.5);
+        ctx.lineTo(x + w/2 + 0.5, y + h/2);
+        ctx.lineTo(x, y);
+        ctx.closePath();
+        ctx.fill();
+    };
+
+    drawCtx(ctx1);
+    drawCtx(ctx2);
+
 };
 
 window.onload = draw();
