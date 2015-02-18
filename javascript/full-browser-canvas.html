@@ -8,6 +8,7 @@ html, body, canvas {
     height: 100%;
     margin: 0;
     padding: 0;
+    line-height: 0;  /* this is important - removes gap at bottom */
 }
   </style>
 </head>
@@ -28,6 +29,6 @@ var draw = function() {
     ctx.fillRect(canvas.width / 2, canvas.height / 2, canvas.width, canvas.height);
 };
 
-window.onload = draw();
-window.resize = draw();
+window.onload = draw;
+window.onresize = draw;
 </script>
