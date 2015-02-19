@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Full Browser Canvas with Header</title>
+  <style>
+html, body, header, article, canvas {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    line-height: 0;  /* this is important - removes gap at bottom */
+}
+header {
+    line-height: 28px;
+}
+h1 {
+    margin: 0;
+    padding: 0;
+}
+html, body {
+    height: 100%;
+}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Full Browser Canvas with Header</h1>
+</header>
+<article>
+  <canvas id="canvas">
+  Your browser doesn't support displaying an HTML5 canvas.
+  </canvas>
+</article>
+</body>
+<script>
+var draw = function() {
+    var canvas = document.getElementById('canvas');
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 0, canvas.width / 2, canvas.height / 2);
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(canvas.width / 2, canvas.height / 2, canvas.width, canvas.height);
+};
+
+window.onload = draw;
+window.onresize = draw;
+</script>
