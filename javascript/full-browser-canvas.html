@@ -29,7 +29,6 @@ var draw = function() {
     ctx.fillStyle = 'blue';
     ctx.fillRect(canvas.width / 2, canvas.height / 2, canvas.width, canvas.height);
 };
-
-window.onload = draw;
-window.onresize = draw;
+window.addEventListener("load", draw);
+window.addEventListener("resize", draw);
 </script>
