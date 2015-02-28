@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Hanging a Canvas</title>
+  <style>
+header {
+    background: goldenrod;
+}
+article {
+    width: 100%;
+    text-align: center;
+}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Hanging a Canvas</h1>
+  <i></i>
+</header>
+<article>
+  <canvas id="canvas">
+  Your browser doesn't support displaying an HTML5 canvas.
+  </canvas>
+</article>
+</body>
+<script>
+var resizeCanvas = function() {
+    var desiredWidth = 640;
+    var desiredHeight = 400;
+    var rect = canvas.parentElement.getBoundingClientRect();
+    var absTop = Math.round(rect.top + window.pageYOffset);
+    var absLeft = Math.round(rect.left + window.pageXOffset);
+    var html = document.documentElement;
+    var availWidth = html.clientWidth - absLeft * 2;
+    var availHeight = html.clientHeight - (absTop + absLeft * 2);
+    var widthFactor = desiredWidth / availWidth;
+    var heightFactor = desiredHeight / availHeight;
+    var scale = 1 / Math.max(widthFactor, heightFactor);
+
+    // If you don't mind expanding the canvas, you can leave out
+    // this scale-clipping guard.  The aspect ratio will still be preserved.
+    scale = scale > 1 ? 1 : scale;
+    
+    var newWidth = Math.trunc(desiredWidth * scale);
+    var newHeight = Math.trunc(desiredHeight * scale);
+    if (canvas.width !== newWidth || canvas.height !== newHeight) {
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        // and redraw
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'red';
+        ctx.fillRect(0, 0, canvas.width / 2, canvas.height / 2);
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(canvas.width / 2, canvas.height / 2, canvas.width, canvas.height);
+    }
+
+    // If you want to center the canvas vertically, here's one way:
+    // figure out how much space you have available below it, and give
+    // the canvas a top-margin of 1/2 that.
+    if (availHeight > canvas.height) {
+        canvas.style.marginTop = Math.round((availHeight - canvas.height) / 2) + "px";
+    }
+
+    document.getElementsByTagName('i')[0].innerHTML = (
+        '(available: ' + availWidth + 'x' + availHeight + ', ' +
+        'scale: ' + scale + ', ' +
+        'result: ' + canvas.width + 'x' + canvas.height + ')'
+    );
+};
+
+window.addEventListener("load", resizeCanvas);
+window.addEventListener("resize", resizeCanvas);
+</script>
