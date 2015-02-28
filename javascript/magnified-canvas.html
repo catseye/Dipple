@@ -45,36 +45,47 @@ var draw = function() {
 
     var drawCtx = function(ctx) {
 
+        ctx.fillStyle = 'black';
+        ctx.fillRect(x, y, w, h);
+
         ctx.beginPath();
+        ctx.strokeStyle = 'red';
         ctx.fillStyle = 'red';
-        ctx.moveTo(x - 0.5, y);
-        ctx.lineTo(x + w/2, y + h/2 + 0.5);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + w/2, y + h/2);
         ctx.lineTo(x + w, y);
         ctx.closePath();
+        //ctx.stroke();
         ctx.fill();
         
         ctx.beginPath();
+        ctx.strokeStyle = 'green';
         ctx.fillStyle = 'green';
-        ctx.moveTo(x + w, y - 0.5);
-        ctx.lineTo(x + w/2 - 0.5, y + h/2);
+        ctx.moveTo(x + w, y);
+        ctx.lineTo(x + w/2, y + h/2);
         ctx.lineTo(x + w, y + h);
         ctx.closePath();
+        //ctx.stroke();
         ctx.fill();
         
         ctx.beginPath();
+        ctx.strokeStyle = 'blue';
         ctx.fillStyle = 'blue';
-        ctx.moveTo(x + w + 0.5, y + h);
-        ctx.lineTo(x + w/2, y + h/2 - 0.5);
+        ctx.moveTo(x + w, y + h);
+        ctx.lineTo(x + w/2, y + h/2);
         ctx.lineTo(x, y + h);
         ctx.closePath();
+        //ctx.stroke();
         ctx.fill();
         
         ctx.beginPath();
+        ctx.strokeStyle = 'yellow';
         ctx.fillStyle = 'yellow';
-        ctx.moveTo(x, y + h + 0.5);
-        ctx.lineTo(x + w/2 + 0.5, y + h/2);
+        ctx.moveTo(x, y + h);
+        ctx.lineTo(x + w/2, y + h/2);
         ctx.lineTo(x, y);
         ctx.closePath();
+        //ctx.stroke();
         ctx.fill();
     };
 
