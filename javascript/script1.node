@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+# If node barfs with an 'invalid ELF header' error, rename this to script1.js
 
 var args = process.argv.slice(2);
 
@@ -12,7 +13,9 @@ var processLine = function(line) {
 var buffer = "";
 
 process.stdin.on('data', function(data) {
-    var lines = data.split("\r\n");
+    data = data.replace(/\r/g, '');
+    var lines = data.split("\n");
+    console.log(lines);
 
     lines[0] = buffer + lines[0];
     buffer = lines[lines.length - 1];
@@ -25,5 +28,3 @@ process.stdin.on('data', function(data) {
 process.stdin.on('end', function() {
     processLine(buffer);
 });
-
-// process.exit(0);
