@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Concrete Mixer</title>
+  <style>
+body { text-align: center }
+  </style>
+</head>
+<body>
+
+<h1>Concrete Mixer</h1>
+
+<div id="container">
+</div>
+
+</body>
+<script>
+if (window.yoob === undefined) yoob = {};
+
+yoob.makeTextInput = function(container, size, value) {
+    var input = document.createElement('input');
+    input.size = "" + (size || 12);
+    input.value = value || "";
+    container.appendChild(input);
+    return input;
+};
+
+yoob.makeLineBreak = function(container) {
+    var br = document.createElement('br');
+    container.appendChild(br);
+    return br;
+};
+
+yoob.makeSVG = function(container) {
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    container.appendChild(svg);
+    return svg;
+};
+
+yoob.makeSVGElem = function(svg, tag, cfg) {
+    var elem = document.createElementNS(svg.namespaceURI, tag);
+    for (var key in cfg) {
+        if (cfg.hasOwnProperty(key)) {
+            elem.setAttribute(key, cfg[key]);
+        }
+    }
+    svg.appendChild(elem);
+    return elem;
+};
+
+/** MAIN **/
+
+var container = document.getElementById("container");
+
+var input = yoob.makeTextInput(container, 72, "");
+yoob.makeLineBreak(container);
+
+var width = 500;
+var height = 300;
+
+var svg = yoob.makeSVG(container);
+svg.style.width = "" + width + "px";
+svg.style.height = "" + height + "px";
+svg.style.border = "1px solid blue";
+
+input.onchange = function() {
+    var e = yoob.makeSVGElem(svg, "text", {
+        x: Math.floor(Math.random() * ((width / 2) - 20)) + 10,
+        y: Math.floor(Math.random() * (height - 20)) + 10,
+        fill: "black",
+        "font-size": 10 + Math.floor(Math.random() * 10)
+    });
+    e.innerHTML = input.value;
+    input.value = "";
+};
+
+input.focus();
+</script>
