@@ -46,6 +46,16 @@ def md5(filename):
     return hash.hexdigest()
 
 
+def traverse_directory(directory, sizemap):
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            full = os.path.normpath(os.path.join(root, filename))
+            if os.path.islink(full):
+                continue
+            size = os.path.getsize(full)
+            sizemap.setdefault(size, []).append(full)
+
+
 ### MAIN ###
 
 
@@ -62,14 +72,17 @@ def main(argv):
                       help="format string for output filenames")
     (options, args) = parser.parse_args()
 
-    hashmap = {}
+    sizemap = {}
     for directory in args:
         print "traversing %s..." % directory
-        for root, dirs, files in os.walk(directory):
-            for filename in files:
-                full = os.path.normpath(os.path.join(root, filename))
-                hash = md5(full)
-                hashmap.setdefault(hash, []).append(full)
+        traverse_directory(directory, sizemap)
+
+    hashmap = {}
+    for size, filenames in sizemap.iteritems():
+        if len(filenames) < 2:
+            continue
+        for filename in filenames:
+            hashmap.setdefault(md5(filename), []).append(filename)
 
     if options.canonical is None:
         for hash in hashmap:
