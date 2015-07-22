@@ -46,15 +46,21 @@ def md5(filename):
     return hash.hexdigest()
 
 
-def traverse_directory(directory, sizemap):
+def build_sizemap(directory, sizemap, exclude=None):
     for root, dirs, files in os.walk(directory):
-        dirs[:] = [d for d in dirs if not d.endswith('_files')]
-        for filename in files:
-            full = os.path.normpath(os.path.join(root, filename))
-            if os.path.islink(full):
-                continue
-            size = os.path.getsize(full)
-            sizemap.setdefault(size, []).append(full)
+        if os.path.normpath(root) == exclude:
+            print "(skipping %s)" % exclude
+            dirs[:] = []
+        else:
+            for filename in files:
+                full = os.path.normpath(os.path.join(root, filename))
+                if os.path.islink(full):
+                    continue
+                try:
+                    size = os.path.getsize(full)
+                    sizemap.setdefault(size, []).append(full)
+                except IOError as e:
+                    print str(e)
 
 
 ### MAIN ###
@@ -76,7 +82,7 @@ def main(argv):
     sizemap = {}
     for directory in args:
         print "traversing %s..." % directory
-        traverse_directory(directory, sizemap)
+        build_sizemap(directory, sizemap)
 
     hashmap = {}
     for size, filenames in sizemap.iteritems():

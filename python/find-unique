@@ -3,16 +3,13 @@
 """
 Find unique files.
 
-Usage: find-unique src-dir {dest-dir | dest-index}
+Usage: find-unique src-dir {dest-dir}
 
 List all files in src-dir which are not to be found anywhere (under any name)
-in any of the dest-dirs or dest-indexes.
+in any of the dest-dirs.
 
 src-dir may be somewhere inside one of the dest-dirs.  src-dir will not be
 traversed during dest-dir traveral.  (really?  doesn't always seem to work)
-
-index files are identified by being files instead of dirs.  index files
-should be created by mk-dups-index.
 
 """
 
@@ -21,15 +18,6 @@ import os
 import re
 import sys
 from optparse import OptionParser
-
-
-def load_index(filename, hashindex):
-    f = open(filename, 'r')
-    for line in f:
-        match = re.match(r'^(.*?)\s+(.*?)$', line)
-        if match:
-            hashindex.setdefault(match.group(1), []).append(match.group(2))
-    f.close()
 
 
 def md5(filename):
@@ -49,17 +37,19 @@ def md5(filename):
     return hash.hexdigest()
 
 
-def build_hashmap(dir, hashmap, exclude=None):
-    for root, dirs, files in os.walk(dir):
+def build_sizemap(directory, sizemap, exclude=None):
+    for root, dirs, files in os.walk(directory):
         if os.path.normpath(root) == exclude:
             print "(skipping %s)" % exclude
             dirs[:] = []
         else:
             for filename in files:
                 full = os.path.normpath(os.path.join(root, filename))
+                if os.path.islink(full):
+                    continue
                 try:
-                    hash = md5(full)
-                    hashmap.setdefault(hash, []).append(full)
+                    size = os.path.getsize(full)
+                    sizemap.setdefault(size, []).append(full)
                 except IOError as e:
                     print str(e)
 
@@ -79,27 +69,41 @@ def main(argv):
     dir_a = os.path.normpath(args[0])
     print "traversing %s..." % dir_a
     a = {}
-    build_hashmap(dir_a, a)
+    build_sizemap(dir_a, a)
 
     b = {}
     for arg in args[1:]:
         dest = os.path.normpath(arg)
         if os.path.isdir(dest):
             print "traversing %s..." % dest
-            build_hashmap(dest, b, exclude=dir_a)
-        else:
-            print "reading index %s..." % dest
-            load_index(dest, b)
+            build_sizemap(dest, b, exclude=dir_a)
 
-    for hash in a:
-        if hash not in b:
-            for filename in a[hash]:
-                print filename
-                if options.move_to is not None:
-                    basename = os.path.basename(filename)
-                    destname = os.path.join(options.move_to, basename)
-                    print "renaming to %s..." % destname
-                    os.rename(filename, destname)
+    def process(filename):
+        print filename
+        if options.move_to is not None:
+            basename = os.path.basename(filename)
+            destname = os.path.join(options.move_to, basename)
+            while os.path.exists(destname):
+                destname += '1'
+            print "renaming to %s..." % destname
+            os.rename(filename, destname)
+
+    for size in a:
+        if size not in b:
+            for filename in a[size]:
+                process(filename)
+        else:
+            a_hash = {}
+            for filename in a[size]:
+                a_hash.setdefault(md5(filename), []).append(filename)
+            b_hash = {}
+            for filename in b[size]:
+                b_hash.setdefault(md5(filename), []).append(filename)
+
+            for hash in a_hash:
+                if hash not in b_hash:
+                    for filename in a_hash[hash]:
+                        process(filename)
 
 
 if __name__ == '__main__':
