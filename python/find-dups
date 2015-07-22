@@ -48,6 +48,7 @@ def md5(filename):
 
 def traverse_directory(directory, sizemap):
     for root, dirs, files in os.walk(directory):
+        dirs[:] = [d for d in dirs if not d.endswith('_files')]
         for filename in files:
             full = os.path.normpath(os.path.join(root, filename))
             if os.path.islink(full):
@@ -88,9 +89,8 @@ def main(argv):
         for hash in hashmap:
             filenames = sorted(hashmap[hash])
             if len(filenames) > 1:
-                print "# %s:" % hash
                 for filename in filenames:
-                    print "#   %s" % filename
+                    print "%s\t%s" % (hash, filename)
     else:
         print
         for hash in hashmap:
