@@ -64,14 +64,23 @@ svg.style.height = "" + height + "px";
 svg.style.border = "1px solid blue";
 
 input.onchange = function() {
+    var x = Math.floor(Math.random() * ((width / 2) - 20)) + 10;
+    var y = Math.floor(Math.random() * (height - 20)) + 10;
+    var size = 10 + Math.floor(Math.random() * 10);
     var e = yoob.makeSVGElem(svg, "text", {
-        x: Math.floor(Math.random() * ((width / 2) - 20)) + 10,
-        y: Math.floor(Math.random() * (height - 20)) + 10,
+        x: x,
+        y: y,
         fill: "black",
-        "font-size": 10 + Math.floor(Math.random() * 10)
+        "font-size": size
     });
     e.innerHTML = input.value;
     input.value = "";
+
+    /* You can also do this by changing the SVG element's innerHTML, like so: */
+
+    /*
+    svg.innerHTML += '<text x="' + x + '" y="' + y + '" fill="black" font-size="' + size + '">' + text + '</text>';
+    */
 };
 
 input.focus();
