@@ -2,6 +2,7 @@
  * sf2tab.c
  * Smallfuck to lookup-table compiler.
  * By Chris Pressey, Cat's Eye Technologies, circa 2005.
+ * + bug fix, Aug 2015: record tape head position as part of state
  * This work has been placed in the public domain.
  */
 
@@ -35,6 +36,7 @@ enum result {
 
 struct state_bucket {
 	struct state_bucket *next;
+	int hd;                         /* tape head position */
 	char *t;			/* tape contents */
 };
 
@@ -66,27 +68,28 @@ clear_state(void)
 }
 
 void
-save_state(int pc, char *t)
+save_state(int pc, int hd, char *t)
 {
 	struct state_bucket *b;
 
 	if (debug_level >= 2) {
-		fprintf(stderr, "saving state (%d, '%s')\n", pc, t);
+		fprintf(stderr, "saving state (%d, %d, '%s')\n", pc, hd, t);
 	}
 
 	b = malloc(sizeof(struct state_bucket));
+	b->hd = hd;
 	b->t = strdup(t);
 	b->next = state[pc];
 	state[pc] = b;
 }
 
 int
-check_state(int pc, char *t)
+check_state(int pc, int hd, char *t)
 {
 	struct state_bucket *b = state[pc];
 
 	while (b != NULL) {
-		if (memcmp(t, b->t, tape_size) == 0)
+		if (hd == b->hd && memcmp(t, b->t, tape_size) == 0)
 			return 1;	/* yes, deja vu */
 		b = b->next;
 	}
@@ -101,7 +104,7 @@ run(char *p, char *t)
 
 	clear_state();
 	for (;;) {
-		save_state(pc, t);		/* record our state */
+		save_state(pc, hd, t);		/* record our state */
 
 		if (debug_level >= 3 && p[pc] != '\0') {
 			fprintf(stderr, "executing '%c'\n", p[pc]);
@@ -161,7 +164,7 @@ run(char *p, char *t)
 		}
 
 		pc++;
-		if (check_state(pc, t))		/* total deja vu? */
+		if (check_state(pc, hd, t))	/* total deja vu? */
 			return HANG;
 	}
 }
