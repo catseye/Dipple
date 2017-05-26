@@ -22,8 +22,8 @@ The version of Rust being used is the current `master` version as of this
 writing (which we all hope will become stable and acquire a version number
 RSN of course.)
 
-To run the tests, have Falderal installed (i.e. have `falderal` on your
-search path; I recommend `toolshelf` for this) and run
+To run the tests, have Falderal installed (i.e. have the `falderal` program
+on your search path; I recommend `shelf` for this) and run
 `falderal --substring-error Tests.markdown`.
 
     -> Tests for functionality "Compile and run Rust program"
