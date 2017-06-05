@@ -36,18 +36,28 @@ Object.keys(Grailbird.data).forEach(function(key) {
     });
 });
 
+var delay = 0;
+
 downloads.forEach(function(pair) {
     var url = pair[1];
     var dest = pair[0] + '_' + path.basename(url);
 
-    var command = 'wget ' + url + ' -O ' + dest;
-    console.log(command);
+    if (fs.existsSync(dest)) {
+        console.log(dest + ' already exists, skipping');
+        return;
+    }
 
-    child = child_process.exec(command, function (error, stdout, stderr) {
-        console.log('stdout: ' + stdout);
-        console.log('stderr: ' + stderr);
-        if (error !== null) {
-            console.log('exec error: ' + error);
-        }
-    });
+    setTimeout(function() {
+        var command = 'wget ' + url + ' -O ' + dest;
+        console.log(command);
+        child = child_process.exec(command, function (error, stdout, stderr) {
+            console.log('stdout: ' + stdout);
+            console.log('stderr: ' + stderr);
+            if (error !== null) {
+                console.log('exec error: ' + error);
+            }
+        });
+    }, delay);
+
+    delay += 1000;
 });
