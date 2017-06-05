@@ -1,5 +1,4 @@
-#!/usr/bin/env node
-# If node barfs with an 'invalid ELF header' error, rename this to script1.js
+#!/usr/bin/env nodejs
 
 var args = process.argv.slice(2);
 
