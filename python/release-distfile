@@ -75,10 +75,17 @@ def main(args):
     if args[0] == '--dry-run':
         args = args[1:]
         dry_run = True
+
     latest_tag = None
-    for tag in each_tag():
-        latest_tag = tag
+    if args[0] == '--tag':
+        args = args[1:]
+        latest_tag = args[0]
+        args = args[1:]
+    else:
+        for tag in each_tag():
+            latest_tag = tag
     print latest_tag
+
     distro = args[0]
     (v_maj, v_min, r_maj, r_min, zip_filename) = match_tag(distro, latest_tag)
     print repr((v_maj, v_min, r_maj, r_min, zip_filename))
