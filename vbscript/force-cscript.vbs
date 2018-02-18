@@ -9,7 +9,7 @@ Dim Pause
 
 If InStr(UCase(WScript.FullName), "CSCRIPT") = 0 Then
     Set WshShell = WScript.CreateObject("WScript.Shell")
-    WshShell.Run "CScript //Nologo " & WScript.ScriptFullName & " /Pause", 1, True
+    WshShell.Run "CScript //Nologo " & Chr(34) & WScript.ScriptFullName & Chr(34) & " /Pause", 1, True
 Else
     WScript.Echo "This should appear in a Console window"
     'Remainder of your script goes here
