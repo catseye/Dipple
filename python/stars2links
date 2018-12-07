@@ -47,11 +47,12 @@ def each_api_thing(username, url_template, auth=None,
         if link is None:
             done = True
         else:
-            match = re.match(r'\<(.*?)\>\s*\;\s*rel\s*=\s*\"next\"', link)
+            match = re.match(r'^.*\<(.*?)\>\s*\;\s*rel\s*=\s*\"next\"', link)
             if not match:
                 done = True
             else:
                 url = match.group(1)
+                assert '>' not in url, (link, url)
 
 
 def each_user_star(username, auth=None):
