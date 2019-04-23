@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>MobX Example</title>
+  <script src="https://unpkg.com/mobx@4.9.4/lib/mobx.umd.min.js"></script>
+</head>
+<body>
+
+<h1>MobX Example</h1>
+
+<div id="status">
+</div>
+
+<script type="text/javascript">
+  var statusElem = document.getElementById('status');
+  var data = mobx.observable({
+      tick: 0
+  });
+  // This will update the display with "40" after 3 seconds,
+  // and then no more, as it disposes the observer after firing:
+  /*
+  mobx.when(function() {
+      return (data.tick > 30);
+  }, function() {
+      statusElem.innerHTML = "<p>" + data.tick + "</p>";
+  });
+  */
+
+  mobx.autorun(function() {
+      if (data.tick > 30) {
+          statusElem.innerHTML = "<p>" + data.tick + "</p>";
+      }
+  });
+
+  i = setInterval(function() {
+      data.tick = data.tick + 10;
+  }, 1000);
+</script>
+
+</body>
