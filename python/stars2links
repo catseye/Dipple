@@ -62,13 +62,15 @@ def each_user_star(username, auth=None):
 
 def main(args):
     parser = optparse.OptionParser(__doc__)
-    parser.add_option("--login", dest="login",
+    parser.add_option("--login",
                       default=None, metavar='USERNAME',
                       help="username to login with when using the "
                            "Github API")
-    parser.add_option("--output", dest="output",
+    parser.add_option("--output",
                       default=None, metavar='FILENAME',
                       help="redirect output to a file (UTF-8 sound)")
+    parser.add_option("--generate-clone-script", action='store_true',
+                      help="generate commands to git clone the repos")
     (options, args) = parser.parse_args(args)
     try:
         username = args[0]
@@ -92,6 +94,9 @@ def main(args):
 
     for star_key in sorted(stars):
         star = stars[star_key]
+        if options.generate_clone_script:
+            output_file.write("git clone {} {}\n".format(star['html_url'], star['full_name'].replace('/', '__')))
+            continue
         output_file.write(u"""
 ### [%s](%s)
 
