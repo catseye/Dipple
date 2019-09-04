@@ -30,7 +30,7 @@ on your search path; I recommend `shelf` for this) and run
 
     -> Functionality "Compile and run Rust program"
     -> is implemented by shell command
-    -> "rustc %(test-file) -o a.out && ./a.out"
+    -> "rustc %(test-body-file) -o a.out && ./a.out"
 
 Some Rudiments
 --------------
