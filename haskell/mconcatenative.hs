@@ -17,10 +17,7 @@ pop (a:s) = s
 ops = [(push 6), (push 6), (add), (push 3), (swap), (divide)]
 
 -- fold functions into a single function and apply it (try "run []")
-run = foldl (.) id (reverse ops)
-
--- shorter
 frun = foldl (flip (.)) id ops
 
 -- mconcat Endos into a single Endo and appEndo it (try "erun []")
-erun = appEndo $ mconcat $ reverse $ map (Endo) ops
+erun = appEndo $ getDual $ mconcat $ map (Dual . Endo) ops
