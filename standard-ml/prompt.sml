@@ -13,11 +13,6 @@ fun loop() =
       "quit\n" => true
     | k        => (execute(k); loop())
 
-fun show_arg () =
-  case CommandLine.arguments () of
-      [arg] => print ("The argument is " ^ arg ^ "\n")
-    | _     => print "Usage: mosmlout arg\n\n"
-
 fun hello () =
   (print "Hello? ";
   let val k = TextIO.input(TextIO.stdIn) in
@@ -25,6 +20,6 @@ fun hello () =
   end)
 
 fun main() =
-  (show_arg(); hello(); loop())
+  (hello(); loop())
 
 val _ = main ();
