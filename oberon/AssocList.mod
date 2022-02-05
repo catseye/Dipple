@@ -3,39 +3,57 @@ MODULE AssocList;
 IMPORT Out;
 
 TYPE
-  Value* = ARRAY 256 OF CHAR;
+  ValuePtr* = POINTER TO Value;
+  Value* = RECORD
+    str: ARRAY 256 OF CHAR
+  END;
   ListPtr* = POINTER TO List;
   List = RECORD
     key: INTEGER;
-    val: Value;
+    val: ValuePtr;
     next: ListPtr
   END;
 
-PROCEDURE Make*(key: INTEGER; val: ARRAY OF CHAR; next: ListPtr): ListPtr;
-  VAR e: ListPtr;
+PROCEDURE Empty*(): ListPtr;
 BEGIN
-  NEW(e);
-  e^.key := key;
-  e^.val := val;
-  e^.next := next;
-  RETURN e
-END Make;
+  RETURN NIL
+END Empty;
 
-PROCEDURE Find*(e: ListPtr; key: INTEGER): ListPtr;
+PROCEDURE Lookup*(e: ListPtr; key: INTEGER): ValuePtr;
   VAR
     f: ListPtr;
-    result: ListPtr;
+    result: ValuePtr;
 BEGIN
   f := e;
   result := NIL;
   WHILE (f # NIL) & (result = NIL) DO
     IF f^.key = key THEN
-      result := f;
+      result := f^.val;
     END;
     f := f^.next;
   END;
   RETURN result
-END Find;
+END Lookup;
+
+PROCEDURE Insert*(VAR e: ListPtr; key: INTEGER; strval: ARRAY OF CHAR): BOOLEAN;
+  VAR
+    f: ListPtr;
+    v: ValuePtr;
+    r: BOOLEAN;
+BEGIN
+  r := FALSE;
+  IF Lookup(e, key) = NIL THEN
+    NEW(f);
+    f^.key := key;
+    NEW(v);
+    v^.str := strval;
+    f^.val := v;
+    f^.next := e;
+    e := f;
+    r := TRUE
+  END
+  RETURN r
+END Insert;
 
 PROCEDURE Remove*(VAR e: ListPtr; key: INTEGER);
   VAR
@@ -44,13 +62,17 @@ PROCEDURE Remove*(VAR e: ListPtr; key: INTEGER);
 BEGIN
   f := e;
   prev := NIL;
-  WHILE (f # NIL) DO
+  WHILE f # NIL DO
     IF f^.key = key THEN
       IF prev = NIL THEN
         e := f^.next;
       ELSE
         prev^.next := f^.next;
       END;
+      (* The Oberon-07 report does not come out and say it, but
+         there is no way to explicitly deallocate memory that
+         has been allocated with NEW().  One presumably relies
+         on garbage collection to occur, instead of saying: *)
       (* DISPOSE(f); *)
       f := NIL;
     END;
@@ -61,10 +83,12 @@ BEGIN
   END;
 END Remove;
 
-PROCEDURE DisplayValue*(e: ListPtr);
+(* ----------- Procedures for the Demo ---------- *)
+
+PROCEDURE DisplayValue*(v: ValuePtr);
 BEGIN
-  IF e # NIL THEN
-    Out.String(e^.val);
+  IF v # NIL THEN
+    Out.String(v^.str);
   ELSE
     Out.String("...");
   END;
@@ -76,7 +100,8 @@ PROCEDURE Scan(list: ListPtr);
 BEGIN
   FOR k := 1 TO 10 DO
     Out.Int(k * 10, 3);
-    DisplayValue(Find(list, k * 10));
+    Out.String(" ");
+    DisplayValue(Lookup(list, k * 10));
     Out.Ln;
   END
 END Scan;
@@ -84,8 +109,15 @@ END Scan;
 PROCEDURE Demo*;
   VAR
     list: ListPtr;
+    r: BOOLEAN;
 BEGIN
-  list := Make(40, "Hello", Make(80, "World!", Make(20, "!", NIL)));
+  list := Empty();
+  r := Insert(list, 40, "Hello");
+  ASSERT(r);
+  r := Insert(list, 80, "World");
+  ASSERT(r);
+  r := Insert(list, 20, "!");
+  ASSERT(r);
   Scan(list);
   Remove(list, 80);
   Scan(list)
