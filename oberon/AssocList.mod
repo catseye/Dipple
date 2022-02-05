@@ -37,27 +37,58 @@ BEGIN
   RETURN result
 END Find;
 
+PROCEDURE Remove*(VAR e: ListPtr; key: INTEGER);
+  VAR
+    f: ListPtr;
+    prev: ListPtr;
+BEGIN
+  f := e;
+  prev := NIL;
+  WHILE (f # NIL) DO
+    IF f^.key = key THEN
+      IF prev = NIL THEN
+        e := f^.next;
+      ELSE
+        prev^.next := f^.next;
+      END;
+      (* DISPOSE(f); *)
+      f := NIL;
+    END;
+    IF f # NIL THEN
+      prev := f;
+      f := f^.next;
+    END;
+  END;
+END Remove;
+
 PROCEDURE DisplayValue*(e: ListPtr);
 BEGIN
   IF e # NIL THEN
     Out.String(e^.val);
   ELSE
-    Out.String("(NIL!)");
+    Out.String("...");
   END;
-  Out.Ln;
 END DisplayValue;
+
+PROCEDURE Scan(list: ListPtr);
+  VAR
+    k: INTEGER;
+BEGIN
+  FOR k := 1 TO 10 DO
+    Out.Int(k * 10, 3);
+    DisplayValue(Find(list, k * 10));
+    Out.Ln;
+  END
+END Scan;
 
 PROCEDURE Demo*;
   VAR
-    e: ListPtr;
-    v: ListPtr;
-    k: INTEGER;
+    list: ListPtr;
 BEGIN
-  e := Make(40, "Hello", Make(80, "World!", NIL));
-  FOR k := 1 TO 10 DO
-    v := Find(e, k * 10);
-    DisplayValue(v);
-  END
+  list := Make(40, "Hello", Make(80, "World!", Make(20, "!", NIL)));
+  Scan(list);
+  Remove(list, 80);
+  Scan(list)
 END Demo;
 
 BEGIN
