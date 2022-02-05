@@ -83,6 +83,34 @@ BEGIN
   END;
 END Remove;
 
+(*
+ * Given two assoc lists A and B, merge them.  For all (key, value) pairs
+ * in B, if the key is not in A, insert (key, value) to A.  If the key is
+ * in A, then if the value matches what it is A, do nothing.  If the value
+ * does not match, signal an error.  Not intended to be efficient.
+ *)
+PROCEDURE Merge*(VAR a: ListPtr; b: ListPtr): BOOLEAN;
+  VAR
+    f: ListPtr;
+    found: ValuePtr;
+    inserted: BOOLEAN;
+    successful: BOOLEAN;
+BEGIN
+  successful := TRUE;
+  f := b;
+  WHILE successful & (f # NIL) DO
+    found := Lookup(a, f^.key);
+    IF found = NIL THEN
+      (* Should always succeed *)
+      inserted := Insert(a, f^.key, f^.val^.str);
+    ELSIF found^.str # f^.val^.str THEN
+      successful := FALSE
+    END;
+    f := f^.next
+  END
+  RETURN successful
+END Merge;
+
 (* ----------- Procedures for the Demo ---------- *)
 
 PROCEDURE DisplayValue*(v: ValuePtr);
@@ -103,24 +131,36 @@ BEGIN
     Out.String(" ");
     DisplayValue(Lookup(list, k * 10));
     Out.Ln;
-  END
+  END;
+  Out.Ln
 END Scan;
 
 PROCEDURE Demo*;
   VAR
-    list: ListPtr;
+    a, b: ListPtr;
     r: BOOLEAN;
 BEGIN
-  list := Empty();
-  r := Insert(list, 40, "Hello");
+  a := Empty();
+  r := Insert(a, 40, "Hello");
   ASSERT(r);
-  r := Insert(list, 80, "World");
+  r := Insert(a, 80, "World");
   ASSERT(r);
-  r := Insert(list, 20, "!");
+  r := Insert(a, 20, "!");
   ASSERT(r);
-  Scan(list);
-  Remove(list, 80);
-  Scan(list)
+  Scan(a);
+  Remove(a, 80);
+  Scan(a);
+
+  b := Empty();
+  r := Insert(b, 30, "Wonderful");
+  ASSERT(r);
+  r := Insert(b, 70, "Fantastic");
+  ASSERT(r);
+
+  r := Merge(a, b);
+  ASSERT(r);
+  Scan(a)
+
 END Demo;
 
 BEGIN
