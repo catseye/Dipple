@@ -5,7 +5,7 @@ IMPORT Out;
 TYPE
   ValuePtr* = POINTER TO Value;
   Value* = RECORD
-    str: ARRAY 256 OF CHAR
+    str*: ARRAY 256 OF CHAR
   END;
   ListPtr* = POINTER TO List;
   List = RECORD
@@ -110,58 +110,6 @@ BEGIN
   END
   RETURN successful
 END Merge;
-
-(* ----------- Procedures for the Demo ---------- *)
-
-PROCEDURE DisplayValue*(v: ValuePtr);
-BEGIN
-  IF v # NIL THEN
-    Out.String(v^.str);
-  ELSE
-    Out.String("...");
-  END;
-END DisplayValue;
-
-PROCEDURE Scan(list: ListPtr);
-  VAR
-    k: INTEGER;
-BEGIN
-  FOR k := 1 TO 10 DO
-    Out.Int(k * 10, 3);
-    Out.String(" ");
-    DisplayValue(Lookup(list, k * 10));
-    Out.Ln;
-  END;
-  Out.Ln
-END Scan;
-
-PROCEDURE Demo*;
-  VAR
-    a, b: ListPtr;
-    r: BOOLEAN;
-BEGIN
-  a := Empty();
-  r := Insert(a, 40, "Hello");
-  ASSERT(r);
-  r := Insert(a, 80, "World");
-  ASSERT(r);
-  r := Insert(a, 20, "!");
-  ASSERT(r);
-  Scan(a);
-  Remove(a, 80);
-  Scan(a);
-
-  b := Empty();
-  r := Insert(b, 30, "Wonderful");
-  ASSERT(r);
-  r := Insert(b, 70, "Fantastic");
-  ASSERT(r);
-
-  r := Merge(a, b);
-  ASSERT(r);
-  Scan(a)
-
-END Demo;
 
 BEGIN
 END AssocList.

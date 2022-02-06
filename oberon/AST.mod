@@ -89,7 +89,7 @@ END Display;
 PROCEDURE Demo*;
   VAR n: ASTPtr;
 BEGIN
-  n := MkImpl(MkPropVar("p"), MkPropVar("q"));
+  n := MkImpl(MkConj(MkPropVar("p"), MkPropVar("q")), MkDisj(MkPropVar("p"), MkPropVar("q")));
   Display(n);
   Out.Ln()
 END Demo;
